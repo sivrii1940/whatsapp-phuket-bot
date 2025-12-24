@@ -41,53 +41,36 @@ window.fbAsyncInit = function() {
     fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));
 
-// Check saved session from localStorage
+// Check saved session from localStorage - OTOMATIK LOGIN
 async function checkSavedSession() {
     try {
-        // localStorage'dan kaydedilmiş oturum bilgilerini al
         const savedToken = localStorage.getItem('whatsapp_access_token');
         const savedPhoneId = localStorage.getItem('whatsapp_phone_id');
         const savedPhoneNumber = localStorage.getItem('whatsapp_phone_number');
         const savedUserId = localStorage.getItem('whatsapp_user_id');
         
-        if (savedToken && savedPhoneId && savedPhoneNumber) {
-            console.log('📱 Kaydedilmiş oturum bulundu, doğrulanıyor...');
-            updateConnectionStatus('connecting', 'Bağlanıyor...', 'Oturum kontrol ediliyor');
+        if (savedToken && savedPhoneId && savedUserId) {
+            console.log('📱 Kaydedilmiş oturum bulundu - OTOMATIK GİRİŞ');
             
             metaAccessToken = savedToken;
             connectedPhoneId = savedPhoneId;
             currentUserId = savedUserId;
             
-            // Backend'e bağlantıyı doğrula
-            const isValid = await verifyConnection(savedToken, savedPhoneId);
+            // Direkt bağlan - token kontrolü yapmadan
+            updateConnectionStatus(true, savedPhoneNumber);
+            initializeSocket(savedUserId);
             
-            if (isValid) {
-                console.log('✅ Oturum geçerli, bağlantı kuruldu');
-                
-                // Backend'e de bildir
-                const backendCheck = await apiCall('/api/check-whatsapp-connection');
-                if (backendCheck.connected) {
-                    updateConnectionStatus('online', 'WhatsApp Bağlı', savedPhoneNumber);
-                    // Socket.io bağlantısı kur
-                    initializeSocket(savedUserId || backendCheck.userId);
-                } else {
-                    // Backend'de bağlantı yok, yeniden bağlan
-                    clearSavedSession();
-                    updateConnectionStatus('offline', 'Bağlantı Bekleniyor', 'Yeniden bağlanın');
-                }
-            } else {
-                console.log('❌ Oturum geçersiz, temizleniyor');
-                clearSavedSession();
-                updateConnectionStatus('offline', 'Bağlantı Bekleniyor', 'Meta Test Token ile bağlanın');
-            }
+            // Dashboard'a git
+            showPage('dashboard');
+            
+            console.log('✅ Otomatik giriş başarılı!');
         } else {
-            console.log('ℹ️ Kaydedilmiş oturum bulunamadı');
-            updateConnectionStatus('offline', 'Bağlantı Bekleniyor', 'Meta Test Token ile bağlanın');
+            console.log('ℹ️ İlk giriş - Facebook login gerekli');
+            showPage('connection');
         }
     } catch (error) {
-        console.error('Saved session check error:', error);
-        clearSavedSession();
-        updateConnectionStatus('offline', 'Bağlantı Bekleniyor', 'Meta Test Token ile bağlanın');
+        console.error('Session check error:', error);
+        showPage('connection');
     }
 }
 
@@ -517,35 +500,35 @@ function showConnectionStatus(message, type) {
     }
 }
 
-// Update connection status in sidebar
-function updateConnectionStatus(status, mainText, subText) {
+// Update connection status in sidebar - Persistent Session
+function updateConnectionStatus(isConnected, phoneNumber = '') {
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
     const statusSubtext = document.getElementById('statusSubtext');
-    const connectBtn = document.getElementById('facebook-connect-btn');
     
-    // Update dashboard status too
-    const dashStatusDot = document.getElementById('dashStatusDot');
-    const dashStatusText = document.getElementById('dashStatusText');
-    
-    statusDot.className = `status-dot ${status}`;
-    statusText.textContent = mainText;
-    statusSubtext.textContent = subText;
-    
-    if (dashStatusDot) dashStatusDot.className = `status-dot ${status}`;
-    if (dashStatusText) dashStatusText.textContent = mainText;
-    
-    if (status === 'online') {
-        connectBtn.style.display = 'none';
-    } else {
-        connectBtn.style.display = 'block';
-        if (status === 'connecting') {
-            connectBtn.disabled = true;
-            connectBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Bağlanıyor...';
-        } else {
-            connectBtn.disabled = false;
-            connectBtn.innerHTML = '<i class="bi bi-facebook"></i> Bağlan';
+    if (isConnected) {
+        if (statusDot) {
+            statusDot.classList.remove('offline');
+            statusDot.classList.add('online');
         }
+        if (statusText) statusText.textContent = 'WhatsApp Bağlı';
+        if (statusSubtext) statusSubtext.textContent = phoneNumber || 'Aktif';
+        
+        // Session'ı sürekli tut - localStorage'ı periyodik olarak yenile
+        setInterval(() => {
+            const token = localStorage.getItem('whatsapp_access_token');
+            if (token) {
+                localStorage.setItem('whatsapp_last_activity', new Date().toISOString());
+                console.log('💾 Session aktif tutuldu');
+            }
+        }, 5 * 60 * 1000); // 5 dakikada bir
+    } else {
+        if (statusDot) {
+            statusDot.classList.remove('online');
+            statusDot.classList.add('offline');
+        }
+        if (statusText) statusText.textContent = 'Bağlantısız';
+        if (statusSubtext) statusSubtext.textContent = 'Facebook ile giriş yapın';
     }
 }
 
