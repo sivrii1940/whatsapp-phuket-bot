@@ -895,7 +895,10 @@ function renderMessageList() {
                 html += `
                     <div class="message-item" onclick="editMessage('${key}')" style="cursor: pointer;">
                         <div class="icon"><i class="bi ${icon}"></i></div>
-                        <div>${label}</div>
+                        <div class="flex-grow-1">
+                            <div style="font-weight: 500;">${label}</div>
+                            <small class="text-muted">${msg.message ? msg.message.substring(0, 50) + '...' : 'Boş mesaj'}</small>
+                        </div>
                     </div>
                 `;
             }
@@ -1098,6 +1101,37 @@ async function deleteFlow() {
 
     currentFlows.menuSecenekleri.splice(selectedFlow, 1);
     selectedFlow = null;
+
+    try {
+        await apiCall('/api/flows', 'POST', currentFlows);
+        showToast('Seçenek silindi!', 'success');
+        renderFlowsList();
+        document.getElementById('flowEditor').innerHTML = '<p class="text-muted">Listeden bir seçenek seçin</p>';
+    } catch (error) {
+        console.error('Silme hatası:', error);
+        showToast('Seçenek silinemedi!', 'error');
+    }
+}
+
+// YENİ FLOW EKLEME FONKSİYONU
+function addNewFlow() {
+    const newFlow = {
+        id: Date.now(),
+        numara: (currentFlows.menuSecenekleri.length + 1).toString(),
+        baslik: 'Yeni Seçenek',
+        anahtar_kelimeler: [],
+        mesaj: '',
+        katalog: null
+    };
+    
+    currentFlows.menuSecenekleri.push(newFlow);
+    renderFlowsList();
+    
+    // Yeni eklenen flow'ı seç
+    selectFlow(currentFlows.menuSecenekleri.length - 1);
+    
+    showToast('Yeni seçenek eklendi! Lütfen düzenleyin.', 'info');
+}
 
     try {
         const result = await apiCall('/api/flows', 'POST', currentFlows);
