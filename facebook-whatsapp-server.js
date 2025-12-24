@@ -17,7 +17,7 @@ const io = socketIO(server, {
 app.use(express.json());
 app.use(express.static('public'));
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const USERS_DATA_FILE = path.join(__dirname, 'data', 'connected-users.json');
 
 // Facebook ile bağlanan kullanıcılar
