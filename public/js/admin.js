@@ -325,14 +325,6 @@ async function connectWhatsAppAccount(accessToken, phoneId, phoneNumber, busines
         alert('Bağlantı kurulurken hata: ' + error.message);
     }
 }
-        }, {
-            scope: 'whatsapp_business_management'
-        });
-    } catch (error) {
-        console.error('Facebook login error:', error);
-        showConnectionStatus('Facebook girişi hatası: ' + error.message, 'danger');
-    }
-}
 
 // Get User's WhatsApp Business Accounts
 async function getUserWhatsAppAccounts(accessToken) {
