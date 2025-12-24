@@ -1125,39 +1125,6 @@ function addNewFlow() {
     showToast('Yeni seçenek eklendi! Lütfen düzenleyin.', 'info');
 }
 
-    try {
-        const result = await apiCall('/api/flows', 'POST', currentFlows);
-
-        if (result && result.success !== false) {
-            showToast('Seçenek silindi!', 'success');
-            renderFlowsList();
-            document.getElementById('flowEditor').innerHTML = `
-                <div class="text-center text-muted p-4">
-                    <i class="bi bi-hand-index" style="font-size: 3rem; opacity: 0.3;"></i>
-                    <p class="mt-3">Düzenlemek için soldaki listeden bir seçenek seçin</p>
-                </div>
-            `;
-        }
-    } catch (error) {
-        console.error('Silme hatası:', error);
-        showToast('Silinemedi!', 'error');
-    }
-}
-
-document.getElementById('addFlowBtn')?.addEventListener('click', () => {
-    const newFlow = {
-        id: Date.now(),
-        numara: String(currentFlows.menuSecenekleri.length + 1),
-        baslik: 'Yeni Seçenek',
-        anahtar_kelimeler: [],
-        mesaj: '',
-        katalog: null
-    };
-    currentFlows.menuSecenekleri.push(newFlow);
-    renderFlowsList();
-    selectFlow(currentFlows.menuSecenekleri.length - 1);
-});
-
 // =====================
 // CATALOGS
 // =====================
