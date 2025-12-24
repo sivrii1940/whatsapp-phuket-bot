@@ -222,32 +222,126 @@ async function connectWithTestToken() {
     }
 }
 
-// Connect with Facebook
-async function connectWithFacebook() {
-    // Check if HTTPS
-    if (window.location.protocol === 'http:') {
-        showConnectionStatus('⚠️ Facebook Login sadece HTTPS üzerinden çalışır. Localhost\'ta Meta Test Token kullanın.', 'warning');
-        return;
-    }
-    
+// Facebook Login Function
+function loginWithFacebook() {
     if (typeof FB === 'undefined') {
-        showConnectionStatus('Facebook SDK yükleniyor, lütfen bekleyin...', 'warning');
-        setTimeout(connectWithFacebook, 2000);
+        alert('Facebook SDK yükleniyor, lütfen sayfayı yenileyin.');
+        location.reload();
         return;
     }
     
-    showConnectionStatus('Facebook ile giriş yapılıyor...', 'info');
+    console.log('🔵 Facebook Login başlatılıyor...');
     
+    FB.login(function(response) {
+        if (response.authResponse) {
+            console.log('✅ Facebook login başarılı!');
+            const accessToken = response.authResponse.accessToken;
+            const userID = response.authResponse.userID;
+            
+            console.log('🔑 Access Token alındı:', accessToken.substring(0, 20) + '...');
+            console.log('👤 User ID:', userID);
+            
+            // WhatsApp Business hesaplarını al
+            getWhatsAppBusinessAccounts(accessToken);
+        } else {
+            console.log('❌ Facebook login iptal edildi veya başarısız');
+            alert('Facebook girişi başarısız oldu. Lütfen tekrar deneyin.');
+        }
+    }, {
+        scope: 'business_management,whatsapp_business_management,whatsapp_business_messaging',
+        return_scopes: true
+    });
+}
+
+// WhatsApp Business hesaplarını al
+async function getWhatsAppBusinessAccounts(accessToken) {
     try {
-        FB.login(function(response) {
-            if (response.authResponse) {
-                console.log('Facebook login successful:', response);
-                userAccessToken = response.authResponse.accessToken;
-                showConnectionStatus('Facebook girişi başarılı! WhatsApp Business hesapları alınıyor...', 'info');
-                getUserWhatsAppAccounts(userAccessToken);
+        console.log('📱 WhatsApp Business hesapları alınıyor...');
+        
+        // Meta Graph API'den WhatsApp Business hesaplarını al
+        const response = await fetch(`https://graph.facebook.com/v21.0/me/businesses?access_token=${accessToken}`);
+        const data = await response.json();
+        
+        if (data.data && data.data.length > 0) {
+            console.log('✅ Business hesapları bulundu:', data.data);
+            
+            // İlk business'ın WhatsApp hesaplarını al
+            const businessId = data.data[0].id;
+            const wbaResponse = await fetch(`https://graph.facebook.com/v21.0/${businessId}/owned_whatsapp_business_accounts?access_token=${accessToken}`);
+            const wbaData = await wbaResponse.json();
+            
+            if (wbaData.data && wbaData.data.length > 0) {
+                const waba = wbaData.data[0];
+                console.log('✅ WhatsApp Business Account bulundu:', waba);
+                
+                // Phone Number ID'yi al
+                const phoneResponse = await fetch(`https://graph.facebook.com/v21.0/${waba.id}/phone_numbers?access_token=${accessToken}`);
+                const phoneData = await phoneResponse.json();
+                
+                if (phoneData.data && phoneData.data.length > 0) {
+                    const phone = phoneData.data[0];
+                    console.log('✅ Telefon numarası bulundu:', phone);
+                    
+                    // Bağlantıyı kur
+                    await connectWhatsAppAccount(accessToken, phone.id, phone.display_phone_number, waba.name);
+                } else {
+                    alert('WhatsApp telefon numarası bulunamadı.');
+                }
             } else {
-                showConnectionStatus('Facebook girişi iptal edildi veya hata oluştu.', 'danger');
+                alert('WhatsApp Business hesabı bulunamadı. Lütfen Meta Business Suite\'de WhatsApp hesabı ekleyin.');
             }
+        } else {
+            alert('Facebook Business hesabı bulunamadı.');
+        }
+    } catch (error) {
+        console.error('❌ Hata:', error);
+        alert('WhatsApp hesapları alınırken hata: ' + error.message);
+    }
+}
+
+// WhatsApp hesabını bağla
+async function connectWhatsAppAccount(accessToken, phoneId, phoneNumber, businessName) {
+    try {
+        console.log('🔌 WhatsApp hesabı bağlanıyor...');
+        
+        const response = await apiCall('/api/connect-whatsapp', 'POST', {
+            accessToken: accessToken,
+            phoneId: phoneId,
+            phoneNumber: phoneNumber,
+            accountId: phoneId,
+            accountName: businessName,
+            businessName: businessName
+        });
+        
+        if (response.success) {
+            // Session bilgilerini kaydet
+            localStorage.setItem('whatsapp_access_token', accessToken);
+            localStorage.setItem('whatsapp_phone_id', phoneId);
+            localStorage.setItem('whatsapp_phone_number', phoneNumber);
+            localStorage.setItem('whatsapp_user_id', response.userId);
+            
+            connectedPhoneId = phoneId;
+            metaAccessToken = accessToken;
+            currentUserId = response.userId;
+            
+            // UI'ı güncelle
+            updateConnectionStatus(true, phoneNumber);
+            
+            // Socket bağlantısı
+            initializeSocket(response.userId);
+            
+            alert('✅ WhatsApp Business hesabınız başarıyla bağlandı!');
+            
+            // Dashboard'a git
+            showPage('dashboard');
+        } else {
+            alert('Bağlantı hatası: ' + (response.error || 'Bilinmeyen hata'));
+        }
+    } catch (error) {
+        console.error('❌ Bağlantı hatası:', error);
+        alert('Bağlantı kurulurken hata: ' + error.message);
+    }
+}
         }, {
             scope: 'whatsapp_business_management'
         });

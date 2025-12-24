@@ -210,42 +210,40 @@
                             <div id="connectionOptions">
                                 <div class="row justify-content-center">
                                     <div class="col-md-10">
-                                        <div class="card border text-center h-100" style="border: 3px solid #25D366;">
+                                        <div class="card border text-center h-100" style="border: 3px solid #1877F2;">
                                             <div class="card-body p-4">
-                                                <i class="bi bi-whatsapp" style="font-size: 4rem; color: #25D366;"></i>
-                                                <h3 class="mt-3 mb-2">WhatsApp Business API</h3>
-                                                <p class="text-muted mb-4">Meta Developer Console'dan aldığınız API bilgileriyle bağlanın</p>
+                                                <i class="bi bi-facebook" style="font-size: 4rem; color: #1877F2;"></i>
+                                                <h3 class="mt-3 mb-2">Facebook ile Bağlan</h3>
+                                                <p class="text-muted mb-4">Facebook hesabınızla giriş yaparak WhatsApp Bot'u yönetin</p>
                                                 
                                                 <div class="d-flex flex-column gap-2 mb-4 text-start" style="font-size: 0.9rem;">
                                                     <div class="d-flex align-items-center">
                                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                                        <span>Kendi WhatsApp Business numaranız</span>
+                                                        <span>Güvenli Facebook OAuth girişi</span>
                                                     </div>
                                                     <div class="d-flex align-items-center">
                                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                                        <span>Gerçek Interactive Butonlar (mobilde çalışır!)</span>
+                                                        <span>Otomatik WhatsApp Business API bağlantısı</span>
                                                     </div>
                                                     <div class="d-flex align-items-center">
                                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                                        <span>Meta'nın resmi API'si</span>
+                                                        <span>Token ve izinler otomatik yönetilir</span>
                                                     </div>
                                                     <div class="d-flex align-items-center">
                                                         <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                                        <span>Profesyonel mesajlaşma desteği</span>
+                                                        <span>Tek tıkla bağlan, hemen kullan!</span>
                                                     </div>
                                                 </div>
                                                 
-                                                <button class="btn btn-success btn-lg w-100" onclick="connectWithTestToken()">
-                                                    <i class="bi bi-key me-2"></i>Meta API ile Bağlan
+                                                <button class="btn btn-lg w-100" onclick="loginWithFacebook()" style="background: #1877F2; color: white; border: none;">
+                                                    <i class="bi bi-facebook me-2"></i>Facebook ile Giriş Yap
                                                 </button>
                                                 
                                                 <div class="alert alert-info mt-3 mb-0">
                                                     <small>
-                                                        <strong>Nereden alınır?</strong><br>
-                                                        Meta Developer Console → API Testing sayfasından:<br>
-                                                        • Access Token<br>
-                                                        • Phone Number ID<br>
-                                                        • Telefon Numarası
+                                                        <i class="bi bi-info-circle me-1"></i>
+                                                        <strong>Nasıl Çalışır?</strong><br>
+                                                        Facebook hesabınızla giriş yapın → WhatsApp Business hesabınız otomatik bağlanır → Bot kullanıma hazır!
                                                     </small>
                                                 </div>
                                             </div>
@@ -292,41 +290,41 @@
                                     <div class="step-item">
                                         <div class="step-number">1</div>
                                         <div class="step-content">
-                                            <h6>Meta Developer Console</h6>
-                                            <p>developers.facebook.com → Apps → bot Mustafa → API Testing sayfasına gidin</p>
+                                            <h6>Facebook Butonu</h6>
+                                            <p>"Facebook ile Giriş Yap" butonuna tıklayın</p>
                                         </div>
                                     </div>
                                     <div class="step-item">
                                         <div class="step-number">2</div>
                                         <div class="step-content">
-                                            <h6>Access Token Kopyalayın</h6>
-                                            <p>"Generate access token" butonuna tıklayıp token'ı kopyalayın</p>
+                                            <h6>Facebook Girişi</h6>
+                                            <p>Facebook hesabınızla giriş yapın ve izinleri onaylayın</p>
                                         </div>
                                     </div>
                                     <div class="step-item">
                                         <div class="step-number">3</div>
                                         <div class="step-content">
-                                            <h6>Phone Number ID</h6>
-                                            <p>Sayfada görünen Phone Number ID'yi alın (örn: 979792258544716)</p>
+                                            <h6>Otomatik Bağlantı</h6>
+                                            <p>WhatsApp Business hesabınız otomatik olarak bağlanacak</p>
                                         </div>
                                     </div>
                                     <div class="step-item">
                                         <div class="step-number">4</div>
                                         <div class="step-content">
-                                            <h6>Bağlan</h6>
-                                            <p>"Meta API ile Bağlan" butonuna tıklayıp bilgileri yapıştırın</p>
+                                            <h6>Kullanıma Hazır!</h6>
+                                            <p>Bot artık mesajlara cevap vermeye hazır</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="help-box mt-4">
-                                <h6><i class="bi bi-lightbulb"></i> Meta Developer Console Bilgileri</h6>
+                                <h6><i class="bi bi-lightbulb"></i> Facebook Login Hakkında</h6>
                                 <ul>
-                                    <li><strong>Access Token:</strong> Meta API Testing sayfasında "Generate access token" butonuyla alınır</li>
-                                    <li><strong>Phone Number ID:</strong> Test sayfasında gösterilen ID (örn: 979792258544716)</li>
-                                    <li><strong>Test Phone:</strong> Botun kullanacağı WhatsApp Business numarası</li>
-                                    <li><strong>Token Süresi:</strong> 60 dakika geçerli, yeni token alabilirsiniz</li>
+                                    <li><strong>Güvenli:</strong> Facebook OAuth 2.0 protokolü kullanılır</li>
+                                    <li><strong>Otomatik:</strong> Token ve izinler otomatik yönetilir</li>
+                                    <li><strong>Kolay:</strong> Tek butona tıklayarak bağlanın</li>
+                                    <li><strong>Hızlı:</strong> Manuel token girişine gerek yok</li>
                                 </ul>
                             </div>
                         </div>
