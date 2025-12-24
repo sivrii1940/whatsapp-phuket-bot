@@ -216,6 +216,8 @@ function loginWithFacebook() {
     console.log('🔵 Facebook Login başlatılıyor...');
     
     FB.login(function(response) {
+        console.log('📥 Facebook response:', response);
+        
         if (response.authResponse) {
             console.log('✅ Facebook login başarılı!');
             const accessToken = response.authResponse.accessToken;
@@ -228,7 +230,13 @@ function loginWithFacebook() {
             getWhatsAppBusinessAccounts(accessToken);
         } else {
             console.log('❌ Facebook login iptal edildi veya başarısız');
-            alert('Facebook girişi başarısız oldu. Lütfen tekrar deneyin.');
+            console.log('Status:', response.status);
+            
+            if (response.status === 'unknown') {
+                alert('❌ Facebook girişi iptal edildi.\n\nLütfen "Facebook ile Giriş Yap" butonuna tekrar tıklayın ve izinleri onaylayın.');
+            } else {
+                alert('❌ Facebook girişi başarısız.\n\nHata: ' + (response.error || 'Bilinmeyen hata') + '\n\nLütfen tekrar deneyin.');
+            }
         }
     }, {
         scope: 'business_management,whatsapp_business_management,whatsapp_business_messaging',
@@ -1107,6 +1115,14 @@ async function deleteFlow() {
 
 // YENİ FLOW EKLEME FONKSİYONU
 function addNewFlow() {
+    // Eğer currentFlows yoksa veya menuSecenekleri yoksa, initialize et
+    if (!currentFlows) {
+        currentFlows = { menuSecenekleri: [] };
+    }
+    if (!currentFlows.menuSecenekleri) {
+        currentFlows.menuSecenekleri = [];
+    }
+    
     const newFlow = {
         id: Date.now(),
         numara: (currentFlows.menuSecenekleri.length + 1).toString(),
