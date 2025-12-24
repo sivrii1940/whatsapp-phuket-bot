@@ -1,0 +1,23 @@
+# Bağımlılık klasörleri
+node_modules/
+
+# WhatsApp oturum verileri
+whatsapp-session/
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Log dosyaları
+*.log
+npm-debug.log*
+
+# Sistem dosyaları
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Ortam değişkenleri
+.env
+.env.local

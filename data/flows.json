@@ -1,0 +1,67 @@
+{
+  "menuSecenekleri": [
+    {
+      "id": "grup",
+      "numara": "1",
+      "baslik": "Grup Turları",
+      "anahtar_kelimeler": ["grup", "tur", "turlar"],
+      "mesaj": "grupTurlari.anaMenu",
+      "katalog": "phuketTur",
+      "altMenu": [
+        {
+          "id": "ocak",
+          "numara": "1",
+          "baslik": "Ocak (Sömestre)",
+          "anahtar_kelimeler": ["ocak", "sömestre", "somestre"],
+          "mesaj": "grupTurlari.ocakSomestre"
+        },
+        {
+          "id": "subat",
+          "numara": "2",
+          "baslik": "Şubat-Nisan-Mayıs",
+          "anahtar_kelimeler": ["şubat", "subat", "nisan", "mayıs", "mayis"],
+          "mesaj": "grupTurlari.subatNisanMayis"
+        },
+        {
+          "id": "yaz",
+          "numara": "3",
+          "baslik": "Haziran-Ağustos",
+          "anahtar_kelimeler": ["haziran", "temmuz", "ağustos", "agustos", "yaz"],
+          "mesaj": "grupTurlari.haziranAgustos"
+        }
+      ]
+    },
+    {
+      "id": "balayi",
+      "numara": "2",
+      "baslik": "Balayı Tatili",
+      "anahtar_kelimeler": ["balayı", "balayi", "düğün", "dugun"],
+      "mesaj": "balayiTatili.anaMenu",
+      "katalog": "balayiTatil",
+      "altMenu": []
+    },
+    {
+      "id": "ozel",
+      "numara": "3",
+      "baslik": "Özel Tarihli Tur",
+      "anahtar_kelimeler": ["özel", "ozel", "tarih"],
+      "mesaj": "ozelTarihliTur.anaMenu",
+      "katalog": "phuketTur",
+      "altMenu": []
+    }
+  ],
+  "globalKomutlar": [
+    {
+      "komut": ["menu", "menü", "ana menu"],
+      "mesaj": "genel.menuDon"
+    },
+    {
+      "komut": ["yardım", "yardim", "help"],
+      "mesaj": "genel.yardim"
+    },
+    {
+      "komut": ["görüşme", "gorusme", "gorusme planla", "randevu"],
+      "mesaj": "gorusmeTalebi.onay"
+    }
+  ]
+}

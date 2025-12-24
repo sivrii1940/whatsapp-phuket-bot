@@ -1,0 +1,65 @@
+{
+  "hosgeldin": "Merhaba! Phuket'teyiz'e hoş geldiniz.\nSize en uygun seçeneği belirleyebilmemiz için lütfen aşağıdaki turlardan birini seçin:",
+  "hosgeldinButonlar": [
+    {
+      "id": "balayi_tatili", 
+      "metin": "Balayı Turu"
+    },
+    {
+      "id": "grup_turlari",
+      "metin": "Grup Turları"
+    },
+    {
+      "id": "ozel_tarihli",
+      "metin": "Özel Tarihli Tur"
+    }
+  ],
+  "grupTurlari": {
+    "anaMenu": "📋 *Grup Turları - Aylık Çıkış Tarihleri*\n\nGrup turlarımız yıl boyunca belirli çıkış tarihlerinde düzenlenmektedir.\n\nSize en uygun grubu kolayca seçebilmeniz için ay ay paylaşıyorum:",
+    "anaMenuButonlar": [
+      {
+        "id": "ocak_somestre",
+        "metin": "❄️ Ocak (Sömestre)"
+      },
+      {
+        "id": "subat_nisan_mayis", 
+        "metin": "🌸 Şubat-Nisan-Mayıs"
+      },
+      {
+        "id": "haziran_agustos",
+        "metin": "☀️ Haziran-Ağustos"
+      }
+    ],
+    "ocakSomestre": "❄️ *Ocak Sömestre Phuket Turu*\n\nSömestre dönemi için iki çıkışımız bulunmaktadır:\n\n📅 *17-24 Ocak*\n📅 *24-31 Ocak*\n\n🏖️ 7 gece konaklama\n✈️ Türk Havayolları ile direkt uçuş\n🍽️ Her şey dahil sistem\n🚐 VIP araç transferleri",
+    "ocakSomestreButonlar": [
+      {
+        "id": "detay_ocak",
+        "metin": "📄 Detaylı Bilgi"
+      },
+      {
+        "id": "gorusme_ocak",
+        "metin": "📞 Görüşme Planla"
+      },
+      {
+        "id": "menu_don",
+        "metin": "🔙 Ana Menü"
+      }
+    ],
+    "subatNisanMayis": "🌸 *Şubat - Nisan - Mayıs Phuket Grup Turları*\n\nBu dönem için düzenlenen grup turu çıkışlarımız aşağıdaki gibidir:\n\n📅 *Şubat*\n📅 *7-14 Şubat* 💕\n\nDetaylı bilgi için \"DETAY\" yazın veya görüşme planlamak için \"GÖRÜŞME\" yazın.",
+    "haziranAgustos": "☀️ *Haziran - Temmuz - Ağustos Yaz Dönemi Phuket Turları*\n\nYaz dönemi boyunca düzenlenen grup turu çıkışlarımız:\n\n📅 *Haziran*\n📅 *6-13 Haziran*\n\nDetaylı bilgi için \"DETAY\" yazın veya görüşme planlamak için \"GÖRÜŞME\" yazın."
+  },
+  "balayiTatili": {
+    "anaMenu": "💍 *Phuket'te Hayat Gibi Balayı Tatili*\n\nHayatınızın en özel günlerini, tropik bir adada unutulmaya hazır mısınız? 🌺\n\nBalayı tatilimizle Phuket'te, her detayı özenle düşünülmüş bir programla süsleyeceğiz.\n\n📄 *Balayı Tatil Kataloğu* gönderiliyor...\n\nKatalog inceledikten sonra \"GÖRÜŞME\" yazarak randevu alabilirsiniz."
+  },
+  "ozelTarihliTur": {
+    "anaMenu": "✨ *Özel Tarihli Phuket Turu*\n\nİstediğiniz başlangıç programına göre değil, kendi tarihlerinize ve bütçenize göre özelleştirilmiş bir tur arıyorsanız! 👇\n\nÖzel tarihli Phuket turlarımızla her detayı özenle planlıyoruz.\n\n📄 *Phuket Tur Kataloğu* gönderiliyor...\n\n_Katalog inceledikten sonra \"GÖRÜŞME\" yazarak randevu alabilirsiniz._"
+  },
+  "gorusmeTalebi": {
+    "onay": "📞 *Görüşme Talebiniz Alındı*\n\nTalebiniz alınmıştır.\nEn kısa sürede sizinle iletişime geçeceğiz. 👍\n\n_Teşekkür ederiz!_"
+  },
+  "genel": {
+    "anlasilmadi": "❓ Üzgünüm, mesajınızı anlayamadım.\n\nLütfen menüden bir seçenek seçin veya şu komutlardan birini kullanın:\n\n*MENU* - Ana menüye dön\n*GÖRÜŞME* - Görüşme planla\n*YARDIM* - Yardım al",
+    "menuDon": "🔙 *Ana Menü*\n\nSize nasıl yardımcı olabilirim?\n\n*1️⃣ Grup Turları*\n*2️⃣ Balayı Tatili*\n*3️⃣ Özel Tarihli Tur*\n\n_Lütfen 1, 2 veya 3 yazarak seçim yapın._",
+    "yardim": "ℹ️ *Yardım*\n\nKullanabileceğiniz komutlar:\n\n*MENU* - Ana menüye dön\n*GRUP* - Grup turları\n*BALAYI* - Balayı tatili\n*ÖZEL* - Özel tarihli tur\n*GÖRÜŞME* - Görüşme planla\n\n_Herhangi bir sorunuz için \"GÖRÜŞME\" yazarak bizimle iletişime geçebilirsiniz._"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "sirketAdi": "Phuket Türk Ekibi",
+  "calismaSaatleri": {
+    "aktif": false,
+    "baslangic": 9,
+    "bitis": 22
+  },
+  "oturumZamanAsimi": 30,
+  "yanitGecikmesi": 1000,
+  "kataloglar": {
+    "phuketTur": "Phuket_Tur_Katalogu.pdf",
+    "balayi": "Balayi_Tatil_Katalogu.pdf"
+  },
+  "adminSifre": "admin123"
+}

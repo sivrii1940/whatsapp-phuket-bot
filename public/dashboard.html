@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bot - Yönetim Paneli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #25D366;
+            --secondary-color: #128C7E;
+            --dark-color: #075E54;
+            --light-bg: #f0f2f5;
+        }
+        
+        body { background: var(--light-bg); font-family: 'Segoe UI', Tahoma, sans-serif; }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--dark-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            position: fixed;
+            width: 280px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .logo-section { padding: 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo-section h4 { color: white; margin: 10px 0 5px; font-weight: 600; }
+        .logo-section small { color: rgba(255,255,255,0.7); }
+        
+        .nav-label { color: rgba(255,255,255,0.5); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; padding: 15px 25px 8px; }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.85);
+            padding: 12px 25px;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .sidebar .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+        .sidebar .nav-link.active { background: rgba(255,255,255,0.15); color: white; border-left-color: var(--primary-color); }
+        .sidebar .nav-link i { font-size: 1.2rem; width: 24px; }
+        
+        .status-footer { position: absolute; bottom: 0; width: 100%; padding: 20px; background: rgba(0,0,0,0.2); }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .status-dot.online { background: #00ff00; box-shadow: 0 0 10px #00ff00; }
+        .status-dot.offline { background: #ff4444; }
+        .status-dot.connecting { background: #ffaa00; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+        
+        .main-content { margin-left: 280px; padding: 30px; min-height: 100vh; }
+        .page-header h2 { color: var(--dark-color); font-weight: 600; margin-bottom: 5px; }
+        .page-header p { color: #666; margin: 0 0 25px; }
+        
+        .card { border: none; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px; }
+        .card-header { background: white; border-bottom: 1px solid #eee; padding: 18px 24px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .card-header i { color: var(--primary-color); }
+        .card-body { padding: 24px; }
+        
+        .help-box { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-left: 4px solid var(--primary-color); border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; }
+        .help-box h6 { color: var(--dark-color); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .help-box p, .help-box ul { color: #555; margin: 0; font-size: 0.9rem; }
+        .help-box ul { margin: 10px 0 0; padding-left: 20px; }
+        
+        .stat-card { border-radius: 16px; padding: 24px; color: white; position: relative; overflow: hidden; }
+        .stat-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 200%; background: rgba(255,255,255,0.1); transform: rotate(30deg); }
+        .stat-card.green { background: linear-gradient(135deg, #25D366, #128C7E); }
+        .stat-card.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .stat-card.orange { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .stat-card.blue { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .stat-number { font-size: 2.5rem; font-weight: 700; }
+        .stat-label { opacity: 0.9; font-size: 0.9rem; }
+        .stat-icon { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font-size: 4rem; opacity: 0.2; }
+        
+        .connection-option { cursor: pointer; transition: all 0.3s; }
+        .connection-option:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .connection-option .card-body { padding: 1.5rem; }
+        .connection-option i { transition: color 0.3s; }
+        .connection-option:hover i { transform: scale(1.1); }
+        
+        .step-item { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 15px; }
+        .step-number { width: 32px; height: 32px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
+        .step-content h6 { margin: 0 0 5px; color: #333; }
+        .step-content p { margin: 0; color: #666; font-size: 0.9rem; }
+        
+        .message-list { max-height: 500px; overflow-y: auto; }
+        .message-item { padding: 12px 16px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+        .message-item:hover { background: #f8f9fa; }
+        .message-item.active { background: #e8f5e9; border-left: 3px solid var(--primary-color); }
+        .message-item.category { background: #f8f9fa; font-weight: 600; color: var(--dark-color); cursor: default; }
+        .message-item .icon { width: 36px; height: 36px; background: #e8f5e9; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary-color); }
+        
+        .message-editor-area { min-height: 200px; font-family: monospace; font-size: 14px; line-height: 1.6; }
+        
+        .phone-preview { background: #e5ddd5; border-radius: 20px; padding: 20px; max-height: 300px; overflow-y: auto; }
+        .chat-bubble { background: white; border-radius: 8px 8px 8px 0; padding: 12px 16px; max-width: 90%; box-shadow: 0 1px 2px rgba(0,0,0,0.1); white-space: pre-wrap; }
+        
+        .flow-card { border: 2px solid #e0e0e0; border-radius: 12px; padding: 16px; margin-bottom: 12px; background: white; cursor: pointer; }
+        .flow-card:hover { border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(37, 211, 102, 0.15); }
+        .flow-number { width: 40px; height: 40px; background: var(--primary-color); color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; }
+        
+        .btn-whatsapp { background: var(--primary-color); border: none; color: white; padding: 10px 24px; border-radius: 8px; font-weight: 500; }
+        .btn-whatsapp:hover { background: var(--secondary-color); color: white; }
+        .btn-outline-whatsapp { border: 2px solid var(--primary-color); color: var(--primary-color); background: white; padding: 8px 20px; border-radius: 8px; }
+        .btn-outline-whatsapp:hover { background: var(--primary-color); color: white; }
+        
+        .form-control, .form-select { border-radius: 8px; padding: 12px 16px; border: 2px solid #e0e0e0; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.15); }
+        .form-label { font-weight: 500; color: #333; margin-bottom: 8px; }
+        .form-text { color: #888; font-size: 0.85rem; }
+        
+        .log-item { padding: 14px 20px; border-bottom: 1px solid #eee; display: flex; gap: 15px; }
+        .log-item:hover { background: #fafafa; }
+        .log-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .log-icon.incoming { background: #e3f2fd; color: #1976d2; }
+        .log-icon.outgoing { background: #e8f5e9; color: var(--primary-color); }
+        
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        
+        .catalog-item { display: flex; align-items: center; gap: 15px; padding: 15px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 10px; }
+        .catalog-item i { font-size: 2.5rem; color: #dc3545; }
+        
+        @media (max-width: 992px) {
+            .sidebar { width: 100%; position: relative; min-height: auto; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo-section">
+            <i class="bi bi-whatsapp" style="font-size: 3rem; color: var(--primary-color);"></i>
+            <h4>WhatsApp Bot Panel</h4>
+            <small>Üye Yönetimi v2.1</small>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-label">Ana Menü</div>
+            <nav class="nav flex-column">
+                <a class="nav-link active" href="#" data-page="connection">
+                    <i class="bi bi-phone"></i> WhatsApp Bağlantısı
+                </a>
+                <a class="nav-link" href="#" data-page="dashboard">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </nav>
+            
+            <div class="nav-label">İçerik Yönetimi</div>
+            <nav class="nav flex-column">
+                <a class="nav-link" href="#" data-page="messages">
+                    <i class="bi bi-chat-quote"></i> Mesaj İçerikleri
+                </a>
+                <a class="nav-link" href="#" data-page="flows">
+                    <i class="bi bi-diagram-3"></i> Menü & Akışlar
+                </a>
+                <a class="nav-link" href="#" data-page="catalogs">
+                    <i class="bi bi-file-pdf"></i> PDF Kataloglar
+                </a>
+            </nav>
+            
+            <div class="nav-label">Sistem</div>
+            <nav class="nav flex-column">
+                <a class="nav-link" href="#" data-page="whatsapp-business">
+                    <i class="bi bi-cloud-check"></i> WhatsApp Business API
+                </a>
+                <a class="nav-link" href="#" data-page="settings">
+                    <i class="bi bi-gear"></i> Ayarlar
+                </a>
+                <a class="nav-link" href="#" data-page="logs">
+                    <i class="bi bi-journal-text"></i> Konuşma Geçmişi
+                    <span class="badge bg-primary ms-auto" id="logCount">0</span>
+                </a>
+                <a class="nav-link" href="#" onclick="logout()">
+                    <i class="bi bi-box-arrow-right"></i> Çıkış Yap
+                </a>
+            </nav>
+        </div>
+        
+        <div class="status-footer">
+            <div class="d-flex align-items-center gap-3 text-white">
+                <span class="status-dot offline" id="statusDot"></span>
+                <div style="flex: 1;">
+                    <div id="statusText" style="font-weight: 600;">Bağlantı Bekleniyor</div>
+                    <small style="opacity: 0.7;" id="statusSubtext">Facebook ile bağlanın</small>
+                </div>
+                <button id="facebook-connect-btn" class="btn btn-sm" style="background: #1877F2; color: white; border: none;">
+                    <i class="bi bi-facebook"></i> Bağlan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        
+        <!-- Connection Page -->
+        <div id="page-connection" class="page-content">
+            <div class="page-header">
+                <h2><i class="bi bi-phone me-2"></i>WhatsApp Bağlantısı</h2>
+                <p>WhatsApp hesabınızı bota bağlayın</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-link-45deg"></i> WhatsApp Bağlantısı</div>
+                        <div class="card-body">
+                            <div id="connectionOptions">
+                                <div class="row justify-content-center">
+                                    <div class="col-md-10">
+                                        <div class="card border text-center h-100" style="border: 3px solid #25D366;">
+                                            <div class="card-body p-4">
+                                                <i class="bi bi-whatsapp" style="font-size: 4rem; color: #25D366;"></i>
+                                                <h3 class="mt-3 mb-2">WhatsApp Business API</h3>
+                                                <p class="text-muted mb-4">Meta Developer Console'dan aldığınız API bilgileriyle bağlanın</p>
+                                                
+                                                <div class="d-flex flex-column gap-2 mb-4 text-start" style="font-size: 0.9rem;">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                                        <span>Kendi WhatsApp Business numaranız</span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                                        <span>Gerçek Interactive Butonlar (mobilde çalışır!)</span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                                        <span>Meta'nın resmi API'si</span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                                        <span>Profesyonel mesajlaşma desteği</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <button class="btn btn-success btn-lg w-100" onclick="connectWithTestToken()">
+                                                    <i class="bi bi-key me-2"></i>Meta API ile Bağlan
+                                                </button>
+                                                
+                                                <div class="alert alert-info mt-3 mb-0">
+                                                    <small>
+                                                        <strong>Nereden alınır?</strong><br>
+                                                        Meta Developer Console → API Testing sayfasından:<br>
+                                                        • Access Token<br>
+                                                        • Phone Number ID<br>
+                                                        • Telefon Numarası
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Bağlantı Durumu -->
+                                <div class="alert alert-info d-none" id="connectionStatus">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <span id="connectionMessage">Bağlantı kuruluyor...</span>
+                                </div>
+                                
+                                <!-- WhatsApp Hesap Seçimi -->
+                                <div id="whatsappAccountSelection" class="d-none mt-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <i class="bi bi-list-ul"></i> WhatsApp Business Hesaplarınız
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-muted">Facebook hesabınıza bağlı WhatsApp Business hesaplarını seçin:</p>
+                                            <div id="whatsappAccountList"></div>
+                                            <button id="connectSelectedAccount" class="btn btn-success mt-3 d-none">
+                                                <i class="bi bi-check-circle me-2"></i>Seçili Hesabı Bağla
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-list-ol"></i> Nasıl Bağlanılır?</div>
+                        <div class="card-body">
+                            <div class="nav nav-tabs" id="connectionTabs">
+                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#metaApiTab">Meta API Bağlantısı</button>
+                            </div>
+                            
+                            <div class="tab-content mt-3">
+                                <div class="tab-pane fade show active" id="metaApiTab">
+                                    <div class="step-item">
+                                        <div class="step-number">1</div>
+                                        <div class="step-content">
+                                            <h6>Meta Developer Console</h6>
+                                            <p>developers.facebook.com → Apps → bot Mustafa → API Testing sayfasına gidin</p>
+                                        </div>
+                                    </div>
+                                    <div class="step-item">
+                                        <div class="step-number">2</div>
+                                        <div class="step-content">
+                                            <h6>Access Token Kopyalayın</h6>
+                                            <p>"Generate access token" butonuna tıklayıp token'ı kopyalayın</p>
+                                        </div>
+                                    </div>
+                                    <div class="step-item">
+                                        <div class="step-number">3</div>
+                                        <div class="step-content">
+                                            <h6>Phone Number ID</h6>
+                                            <p>Sayfada görünen Phone Number ID'yi alın (örn: 979792258544716)</p>
+                                        </div>
+                                    </div>
+                                    <div class="step-item">
+                                        <div class="step-number">4</div>
+                                        <div class="step-content">
+                                            <h6>Bağlan</h6>
+                                            <p>"Meta API ile Bağlan" butonuna tıklayıp bilgileri yapıştırın</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="help-box mt-4">
+                                <h6><i class="bi bi-lightbulb"></i> Meta Developer Console Bilgileri</h6>
+                                <ul>
+                                    <li><strong>Access Token:</strong> Meta API Testing sayfasında "Generate access token" butonuyla alınır</li>
+                                    <li><strong>Phone Number ID:</strong> Test sayfasında gösterilen ID (örn: 979792258544716)</li>
+                                    <li><strong>Test Phone:</strong> Botun kullanacağı WhatsApp Business numarası</li>
+                                    <li><strong>Token Süresi:</strong> 60 dakika geçerli, yeni token alabilirsiniz</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="page-dashboard" class="page-content" style="display: none;">
+            <div class="page-header">
+                <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+                <p>Bot performansını ve aktiviteleri takip edin</p>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card green">
+                        <div class="stat-number" id="statTotal">0</div>
+                        <div class="stat-label">Toplam Mesaj</div>
+                        <i class="bi bi-chat-dots stat-icon"></i>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card purple">
+                        <div class="stat-number" id="statUsers">0</div>
+                        <div class="stat-label">Aktif Kullanıcı</div>
+                        <i class="bi bi-people stat-icon"></i>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card orange">
+                        <div class="stat-number" id="statToday">0</div>
+                        <div class="stat-label">Bugün</div>
+                        <i class="bi bi-graph-up stat-icon"></i>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card blue">
+                        <div class="stat-number" id="statCatalogs">0</div>
+                        <div class="stat-label">Katalog Gönderildi</div>
+                        <i class="bi bi-file-pdf stat-icon"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-clock-history"></i> Son Konuşmalar
+                            <span class="badge bg-success ms-auto">Canlı</span>
+                        </div>
+                        <div class="card-body p-0" id="dashboardLogs" style="max-height: 400px; overflow-y: auto;">
+                            <div class="text-center text-muted p-5">
+                                <i class="bi bi-chat-left-dots" style="font-size: 3rem; opacity: 0.3;"></i>
+                                <p class="mt-3">Henüz konuşma yok</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-info-circle"></i> Bot Bilgileri</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="text-muted small">DURUM</label>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <span class="status-dot offline" id="dashStatusDot"></span>
+                                    <span id="dashStatusText" class="fw-bold">Çevrimdışı</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted small">SON AKTİVİTE</label>
+                                <div id="lastActivity" class="fw-bold mt-1">-</div>
+                            </div>
+                            <div>
+                                <label class="text-muted small">VERSİYON</label>
+                                <div class="fw-bold mt-1">WhatsApp Bot v2.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Page -->
+        <div id="page-messages" class="page-content" style="display: none;">
+            <div class="page-header">
+                <h2><i class="bi bi-chat-quote me-2"></i>Mesaj İçerikleri</h2>
+                <p>Bot'un göndereceği mesajları buradan düzenleyin</p>
+            </div>
+            
+            <div class="help-box">
+                <h6><i class="bi bi-info-circle"></i> Bu Sayfa Ne İşe Yarar?</h6>
+                <p>Müşterilerinize gönderilen tüm mesajları buradan düzenleyebilirsiniz. Soldaki listeden bir mesaj seçin, sağda düzenleyin ve kaydedin.</p>
+                <ul>
+                    <li><strong>*yıldız içi*</strong> = <strong>kalın</strong> yazı</li>
+                    <li><strong>_alt çizgi içi_</strong> = <em>italik</em> yazı</li>
+                    <li>Emoji kullanabilirsiniz 🌴 ✈️ 💕</li>
+                </ul>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-list"></i> Mesaj Listesi</div>
+                        <div class="card-body p-0">
+                            <div class="message-list" id="messageList"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-pencil"></i> <span id="editingTitle">Mesaj Düzenleme</span></span>
+                            <button class="btn btn-whatsapp" id="saveMessageBtn" disabled>
+                                <i class="bi bi-check-lg"></i> Kaydet
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control message-editor-area" id="messageEditor" 
+                                      placeholder="Soldaki listeden düzenlemek istediğiniz mesajı seçin..." disabled></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-eye"></i> Önizleme</div>
+                        <div class="card-body">
+                            <div class="phone-preview">
+                                <div class="chat-bubble" id="messagePreview">Mesaj önizlemesi burada görünecek...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flows Page -->
+        <div id="page-flows" class="page-content" style="display: none;">
+            <div class="page-header">
+                <h2><i class="bi bi-diagram-3 me-2"></i>Menü & Akışlar</h2>
+                <p>Müşterilerin seçebileceği menü seçeneklerini yönetin</p>
+            </div>
+            
+            <div class="help-box">
+                <h6><i class="bi bi-info-circle"></i> Bu Sayfa Ne İşe Yarar?</h6>
+                <p>Müşteriler "1", "2", "3" gibi rakamlar veya anahtar kelimeler yazdığında hangi mesajın gönderileceğini buradan ayarlayabilirsiniz.</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-menu-button-wide"></i> Ana Menü Seçenekleri</span>
+                            <button class="btn btn-sm btn-outline-whatsapp" id="addFlowBtn">
+                                <i class="bi bi-plus-lg"></i> Yeni Ekle
+                            </button>
+                        </div>
+                        <div class="card-body" id="flowsList"></div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-pencil-square"></i> Seçenek Düzenleme</div>
+                        <div class="card-body" id="flowEditor">
+                            <div class="text-center text-muted p-4">
+                                <i class="bi bi-hand-index" style="font-size: 3rem; opacity: 0.3;"></i>
+                                <p class="mt-3">Düzenlemek için soldaki listeden bir seçenek seçin</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-command"></i> Özel Komutlar</div>
+                        <div class="card-body" id="globalCommands">
+                            <p class="text-muted">Kullanıcıların her zaman kullanabileceği komutlar:</p>
+                            <div class="mb-2"><code>MENU</code> → Ana menüye döner</div>
+                            <div class="mb-2"><code>YARDIM</code> → Yardım mesajı gösterir</div>
+                            <div><code>GÖRÜŞME</code> → Görüşme talebi oluşturur</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catalogs Page -->
+        <div id="page-catalogs" class="page-content" style="display: none;">
+            <div class="page-header">
+                <h2><i class="bi bi-file-pdf me-2"></i>PDF Kataloglar</h2>
+                <p>Müşterilere gönderilen katalog dosyalarını yönetin</p>
+            </div>
+            
+            <div class="help-box">
+                <h6><i class="bi bi-info-circle"></i> Bu Sayfa Ne İşe Yarar?</h6>
+                <p>Müşterilere otomatik olarak gönderilen PDF katalog dosyalarını buradan yönetebilirsiniz. Yeni katalog eklemek için aşağıdaki "PDF Yükle" butonunu kullanın.</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-folder"></i> Mevcut Kataloglar</span>
+                            <label class="btn btn-sm btn-whatsapp mb-0" style="cursor: pointer;">
+                                <i class="bi bi-upload"></i> PDF Yükle
+                                <input type="file" id="catalogUpload" accept=".pdf" style="display: none;" multiple>
+                            </label>
+                        </div>
+                        <div class="card-body" id="catalogsList">
+                            <div class="text-center text-muted p-4">Kataloglar yükleniyor...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upload Progress -->
+                    <div class="card" id="uploadProgressCard" style="display: none;">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="spinner-border text-success" role="status"></div>
+                                <div>
+                                    <strong id="uploadFileName">Dosya yükleniyor...</strong>
+                                    <div class="progress mt-2" style="height: 8px; width: 200px;">
+                                        <div class="progress-bar bg-success" id="uploadProgress" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-link-45deg"></i> Katalog Eşleştirme</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Phuket Tur Kataloğu</label>
+                                <select class="form-select" id="catalogPhuket"></select>
+                                <div class="form-text">Grup turları ve özel turlar için</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Balayı Kataloğu</label>
+                                <select class="form-select" id="catalogBalayi"></select>
+                                <div class="form-text">Balayı tatili seçildiğinde</div>
+                            </div>
+                            <button class="btn btn-whatsapp w-100" id="saveCatalogsBtn">
+                                <i class="bi bi-check-lg"></i> Kaydet
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="page-settings" class="page-content" style="display: none;">
+            <div class="page-header">
+                <h2><i class="bi bi-gear me-2"></i>Ayarlar</h2>
+                <p>Bot davranışını ve sistem ayarlarını yapılandırın</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-building"></i> Şirket Bilgileri</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Şirket Adı</label>
+                                <input type="text" class="form-control" id="settingSirketAdi" placeholder="Örn: Phuket Türk Ekibi">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-clock"></i> Çalışma Saatleri</div>
+                        <div class="card-body">
+                            <div class="help-box mb-3">
+                                <p class="mb-0"><i class="bi bi-lightbulb"></i> Çalışma saatleri dışında otomatik mesaj gönderilir.</p>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="settingCalismaSaatiAktif" style="width: 50px; height: 26px;">
+                                <label class="form-check-label ms-2">Çalışma saati kontrolü aktif</label>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label">Başlangıç</label>
+                                    <input type="number" class="form-control" id="settingSaatBaslangic" value="9" min="0" max="23">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Bitiş</label>
+                                    <input type="number" class="form-control" id="settingSaatBitis" value="22" min="0" max="24">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-sliders"></i> Bot Davranışı</div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <label class="form-label">Yanıt Gecikmesi (ms)</label>
+                                <input type="number" class="form-control" id="settingGecikme" value="1000" min="500" max="5000">
+                                <div class="form-text">1000 = 1 saniye</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Oturum Zaman Aşımı (dakika)</label>
+                                <input type="number" class="form-control" id="settingZamanAsimi" value="30" min="5" max="120">
+                                <div class="form-text">Bu süre sonunda konuşma sıfırlanır</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-whatsapp btn-lg w-100" id="saveSettingsBtn">
+                        <i class="bi bi-check-lg"></i> Tüm Ayarları Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Page -->
+        <div id="page-logs" class="page-content" style="display: none;">
+            <div class="page-header">
+                <h2><i class="bi bi-journal-text me-2"></i>Konuşma Geçmişi</h2>
+                <p>Müşterilerle yapılan tüm konuşmaları görüntüleyin</p>
+            </div>
+            
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-chat-left-text"></i> Mesaj Akışı <span class="badge bg-success">Canlı</span></span>
+                    <button class="btn btn-sm btn-outline-danger" id="clearLogsBtn">
+                        <i class="bi bi-trash"></i> Temizle
+                    </button>
+                </div>
+                <div class="card-body p-0" id="logsContainer" style="max-height: 600px; overflow-y: auto;">
+                    <div class="text-center text-muted p-5">
+                        <i class="bi bi-chat-left-dots" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p class="mt-3">Henüz konuşma yok</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- WhatsApp Business API Page -->
+        <div id="page-whatsapp-business" class="page-content" style="display: none;">
+            <div class="page-header">
+                <h2><i class="bi bi-cloud-check me-2"></i>WhatsApp Business API</h2>
+                <p>Meta WhatsApp Business Cloud API yapılandırması</p>
+            </div>
+            
+            <div class="help-box">
+                <h6><i class="bi bi-info-circle"></i> WhatsApp Business API Nedir?</h6>
+                <p>Meta'nın resmi WhatsApp Business API'si ile gelişmiş mesajlaşma özellikleri kullanabilirsiniz.</p>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header"><i class="bi bi-sliders"></i> API Yapılandırması</div>
+                        <div class="card-body">
+                            <div class="form-check form-switch mb-4">
+                                <input class="form-check-input" type="checkbox" id="wbaEnabled">
+                                <label class="form-check-label fw-bold" for="wbaEnabled">
+                                    WhatsApp Business API'yi Etkinleştir
+                                </label>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number ID</label>
+                                <input type="text" class="form-control" id="wbaPhoneNumberId" placeholder="102345678901234">
+                                <div class="form-text">WhatsApp Business telefon numarası ID'si</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Access Token</label>
+                                <input type="password" class="form-control" id="wbaAccessToken" placeholder="EAAG...">
+                                <div class="form-text">API Access Token</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Webhook Verify Token</label>
+                                <input type="text" class="form-control" id="wbaWebhookToken" placeholder="my_token">
+                                <div class="form-text">Webhook doğrulama token'ı</div>
+                            </div>
+
+                            <button class="btn btn-whatsapp" id="saveWbaConfigBtn">
+                                <i class="bi bi-save"></i> Yapılandırmayı Kaydet
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Chrome extension hatalarını filtrele
+        const originalError = console.error;
+        console.error = function(...args) {
+            const message = args.join(' ');
+            // Chrome extension ve browser internal hatalarını filtrele
+            if (
+                message.includes('listener indicated an asynchronous response') ||
+                message.includes('message channel closed') ||
+                message.includes('Extension context invalidated') ||
+                message.includes('chrome-extension://') ||
+                message.includes('moz-extension://')
+            ) {
+                return; // Bu hataları gösterme
+            }
+            originalError.apply(console, args);
+        };
+
+        // Promise rejection'ları da filtrele
+        window.addEventListener('unhandledrejection', function(event) {
+            const message = event.reason?.message || event.reason || '';
+            if (
+                message.includes('listener indicated an asynchronous response') ||
+                message.includes('message channel closed') ||
+                message.includes('Extension context invalidated')
+            ) {
+                event.preventDefault(); // Hatayı engelle
+                return;
+            }
+        });
+    </script>
+    <!-- Socket.io Client Library -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

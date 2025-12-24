@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bot - Facebook ile Bağlan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #25D366, #128C7E);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .feature-list {
+            text-align: left;
+            margin: 30px 0;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            color: #333;
+        }
+        
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 15px;
+            font-size: 14px;
+        }
+        
+        .facebook-login-btn {
+            background: #1877F2;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+        
+        .facebook-login-btn:hover {
+            background: #166FE5;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(24, 119, 242, 0.3);
+        }
+        
+        .facebook-login-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-message {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .account-list {
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .account-item {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .account-item:hover {
+            border-color: #25D366;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.2);
+        }
+        
+        .account-item.selected {
+            border-color: #25D366;
+            background: #f0f9ff;
+        }
+        
+        .account-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .account-phone {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .connect-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .connect-btn:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">📱</div>
+        <h1>WhatsApp Bot</h1>
+        <p class="subtitle">Facebook hesabınızla bağlanarak kendi WhatsApp Business numaranızı kullanın</p>
+        
+        <div class="feature-list">
+            <div class="feature-item">
+                <div class="feature-icon">✓</div>
+                <span>Kendi WhatsApp Business numaranız</span>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">✓</div>
+                <span>Gerçek Interactive Butonlar</span>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">✓</div>
+                <span>Otomatik token yenileme</span>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">✓</div>
+                <span>Profesyonel mesajlaşma</span>
+            </div>
+        </div>
+        
+        <button id="facebook-login-btn" class="facebook-login-btn">
+            📘 Facebook ile Bağlan
+        </button>
+        
+        <div id="status-message" class="status-message hidden"></div>
+        
+        <div id="account-selection" class="hidden">
+            <h3>WhatsApp Business Hesaplarınız:</h3>
+            <div id="account-list" class="account-list"></div>
+            <button id="connect-btn" class="connect-btn hidden">
+                🚀 Bağlan ve Başla
+            </button>
+        </div>
+        
+        <div id="success-panel" class="hidden">
+            <div class="status-success">
+                <h3>✅ Başarıyla Bağlandı!</h3>
+                <p>WhatsApp Business hesabınız aktif edildi.</p>
+                <p><strong>Phone ID:</strong> <span id="connected-phone"></span></p>
+                <button onclick="goToAdmin()" class="connect-btn">
+                    🎛️ Admin Panel'e Git
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Facebook SDK -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/tr_TR/sdk.js"></script>
+    
+    <script>
+        let selectedAccount = null;
+        let userAccessToken = null;
+        
+        // Facebook SDK Initialize
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: '1420845422894593', // Your Meta App ID
+                cookie: true,
+                xfbml: true,
+                version: 'v21.0'
+            });
+        };
+
+        // Facebook Login
+        document.getElementById('facebook-login-btn').addEventListener('click', function() {
+            showStatus('Facebook ile giriş yapılıyor...', 'loading');
+            
+            FB.login(function(response) {
+                if (response.authResponse) {
+                    console.log('Facebook login successful:', response);
+                    userAccessToken = response.authResponse.accessToken;
+                    showStatus('Giriş başarılı! WhatsApp Business hesapları alınıyor...', 'loading');
+                    getUserWhatsAppAccounts(userAccessToken);
+                } else {
+                    showStatus('Facebook girişi iptal edildi.', 'error');
+                }
+            }, {
+                scope: 'whatsapp_business_management'
+            });
+        });
+
+        // Get User's WhatsApp Business Accounts
+        async function getUserWhatsAppAccounts(accessToken) {
+            try {
+                // İlk olarak user'ın business'larını al
+                const businessResponse = await fetch(`https://graph.facebook.com/v21.0/me/businesses?access_token=${accessToken}`);
+                const businessData = await businessResponse.json();
+                
+                console.log('Businesses:', businessData);
+                
+                if (!businessData.data || businessData.data.length === 0) {
+                    showStatus('WhatsApp Business hesabı bulunamadı. Lütfen önce Meta Business Manager\'da WhatsApp Business hesabınızı kurun.', 'error');
+                    return;
+                }
+                
+                let allWhatsAppAccounts = [];
+                
+                // Her business için WhatsApp hesapları al
+                for (let business of businessData.data) {
+                    try {
+                        const whatsappResponse = await fetch(
+                            `https://graph.facebook.com/v21.0/${business.id}/owned_whatsapp_business_accounts?access_token=${accessToken}`
+                        );
+                        const whatsappData = await whatsappResponse.json();
+                        
+                        if (whatsappData.data) {
+                            for (let account of whatsappData.data) {
+                                // Her WhatsApp account için phone numbers al
+                                const phoneResponse = await fetch(
+                                    `https://graph.facebook.com/v21.0/${account.id}/phone_numbers?access_token=${accessToken}`
+                                );
+                                const phoneData = await phoneResponse.json();
+                                
+                                if (phoneData.data) {
+                                    for (let phone of phoneData.data) {
+                                        allWhatsAppAccounts.push({
+                                            businessName: business.name,
+                                            accountId: account.id,
+                                            accountName: account.name,
+                                            phoneId: phone.id,
+                                            phoneNumber: phone.display_phone_number,
+                                            status: phone.verified_name
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error getting WhatsApp accounts for business:', business.name, error);
+                    }
+                }
+                
+                console.log('All WhatsApp Accounts:', allWhatsAppAccounts);
+                
+                if (allWhatsAppAccounts.length === 0) {
+                    showStatus('WhatsApp Business telefon numarası bulunamadı. Lütfen Meta Business Manager\'da telefon numaranızı ekleyin.', 'error');
+                    return;
+                }
+                
+                showWhatsAppAccounts(allWhatsAppAccounts);
+                
+            } catch (error) {
+                console.error('Error getting WhatsApp accounts:', error);
+                showStatus('WhatsApp Business hesapları alınırken hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        // Show WhatsApp Accounts for Selection
+        function showWhatsAppAccounts(accounts) {
+            const accountList = document.getElementById('account-list');
+            accountList.innerHTML = '';
+            
+            accounts.forEach((account, index) => {
+                const accountDiv = document.createElement('div');
+                accountDiv.className = 'account-item';
+                accountDiv.onclick = () => selectAccount(account, accountDiv);
+                
+                accountDiv.innerHTML = `
+                    <div class="account-name">${account.accountName}</div>
+                    <div class="account-phone">📱 ${account.phoneNumber}</div>
+                    <div style="font-size: 12px; color: #888; margin-top: 5px;">
+                        Business: ${account.businessName}
+                    </div>
+                `;
+                
+                accountList.appendChild(accountDiv);
+            });
+            
+            document.getElementById('account-selection').classList.remove('hidden');
+            showStatus('WhatsApp Business hesaplarınız yüklendi. Birini seçin:', 'success');
+        }
+
+        // Select Account
+        function selectAccount(account, element) {
+            // Remove previous selection
+            document.querySelectorAll('.account-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Add selection to clicked item
+            element.classList.add('selected');
+            selectedAccount = account;
+            
+            document.getElementById('connect-btn').classList.remove('hidden');
+        }
+
+        // Connect Selected Account
+        document.getElementById('connect-btn').addEventListener('click', async function() {
+            if (!selectedAccount) {
+                showStatus('Lütfen bir WhatsApp Business hesabı seçin.', 'error');
+                return;
+            }
+            
+            showStatus('WhatsApp Business hesabı bağlanıyor...', 'loading');
+            
+            try {
+                // Backend'e bağlantı bilgilerini gönder
+                const response = await fetch('/api/connect-whatsapp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        accessToken: userAccessToken,
+                        phoneId: selectedAccount.phoneId,
+                        phoneNumber: selectedAccount.phoneNumber,
+                        accountId: selectedAccount.accountId,
+                        accountName: selectedAccount.accountName,
+                        businessName: selectedAccount.businessName
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccessPanel(selectedAccount);
+                } else {
+                    showStatus('Bağlantı hatası: ' + result.error, 'error');
+                }
+                
+            } catch (error) {
+                showStatus('Bağlantı hatası: ' + error.message, 'error');
+            }
+        });
+
+        // Show Success Panel
+        function showSuccessPanel(account) {
+            document.getElementById('connected-phone').textContent = account.phoneNumber;
+            document.getElementById('account-selection').classList.add('hidden');
+            document.getElementById('success-panel').classList.remove('hidden');
+            document.getElementById('status-message').classList.add('hidden');
+        }
+
+        // Go to Admin Panel
+        function goToAdmin() {
+            window.location.href = '/admin.html';
+        }
+
+        // Show Status Message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

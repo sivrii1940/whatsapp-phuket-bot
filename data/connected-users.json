@@ -1,0 +1,13 @@
+{
+  "122103502245175649": {
+    "accessToken": "EAAUMQFq2XgEBQRTK2pVKbJXmWiZCsqISXZAEiZBh3LZAXmRlwEpN2NGhRAWfYnhuZC185hoTZCAWCqG9wiywC7gOqMOdnQdIKwkZCUphAcGXrzJPgZAHEPq1so81oAJ1wZAVZBrvXJA8PsNX249zyQt1bmFUAmc7NuqUhpFG2QG2TJhXXCpojOju0SZBSTzSDSXc44ytCCTgILrsJsQ8yKpuyqqsNhDA1xnVy6Y7K9POZAxUfZAm0ZC4PW84iRhkVC2ZATnSSQVqmqbIcaRqz41HTsc7ga5qQZDZD",
+    "phoneId": "979792258544716",
+    "phoneNumber": "To\r\n+90 501 630 09 06",
+    "accountId": "test-account",
+    "accountName": "Test WhatsApp Account",
+    "businessName": "My Business",
+    "connectedAt": "2025-12-24T19:56:03.303Z",
+    "lastActivity": "2025-12-24T19:56:03.304Z",
+    "isActive": true
+  }
+}

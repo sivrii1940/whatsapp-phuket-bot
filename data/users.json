@@ -1,0 +1,24 @@
+{
+  "users": [
+    {
+      "id": "1766549203108",
+      "username": "sivrii1940",
+      "email": "sivrii1940@gmail.com",
+      "password": "0f866fbbf8defdee767ded70b1baad5f3387aeeb757189ac9226fd5aca9397c7",
+      "role": "admin",
+      "createdAt": "2025-12-24T04:06:43.108Z",
+      "lastLogin": "2025-12-24T04:06:49.618Z",
+      "isActive": true,
+      "membershipEndDate": "2026-05-25T00:00:00.000Z"
+    }
+  ],
+  "sessions": {
+    "22a49302c5bb170e09506a04c7dc53885e1a9e9c950c4bfdd6b61e8b08e24490": {
+      "userId": "1766549203108",
+      "username": "sivrii1940",
+      "role": "admin",
+      "createdAt": 1766549209618,
+      "expiresAt": 1766635609618
+    }
+  }
+}

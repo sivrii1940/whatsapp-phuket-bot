@@ -1,0 +1,27 @@
+{
+  "name": "phuket-whatsapp-bot",
+  "version": "2.1.0",
+  "description": "Phuket Turlari WhatsApp Chatbot + Admin Panel + Business API",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "panel": "node server.js"
+  },
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "multer": "^2.0.2",
+    "node-fetch": "^2.7.0",
+    "pdfkit": "^0.14.0",
+    "pino": "^10.1.0",
+    "qrcode-terminal": "^0.12.0",
+    "socket.io": "^4.7.2",
+    "whatsapp-web.js": "^1.34.2"
+  },
+  "author": "Tur Sirketi",
+  "license": "MIT"
+}
