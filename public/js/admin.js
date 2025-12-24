@@ -1232,15 +1232,14 @@ async function loadCatalogs() {
 }
 
 // Katalog yükleme
-document.getElementById('catalogUpload')?.addEventListener('change', (e) => {
-    (async () => {
-        try {
-            const files = e.target.files;
-            if (!files.length) return;
+document.getElementById('catalogUpload')?.addEventListener('change', async (e) => {
+    try {
+        const files = e.target.files;
+        if (!files.length) return;
 
-            const progressCard = document.getElementById('uploadProgressCard');
-            const progressBar = document.getElementById('uploadProgress');
-            const fileName = document.getElementById('uploadFileName');
+        const progressCard = document.getElementById('uploadProgressCard');
+        const progressBar = document.getElementById('uploadProgress');
+        const fileName = document.getElementById('uploadFileName');
 
             for (const file of files) {
                 if (!file.name.endsWith('.pdf')) {
@@ -1291,11 +1290,10 @@ document.getElementById('catalogUpload')?.addEventListener('change', (e) => {
             progressCard.style.display = 'none';
             e.target.value = '';
             loadCatalogs();
-        } catch (error) {
-            console.error('Katalog yükleme hatası:', error);
-            showToast('Bir hata oluştu!', 'error');
-        }
-    })();
+    } catch (error) {
+        console.error('Katalog yükleme hatası:', error);
+        showToast('Bir hata oluştu!', 'error');
+    }
 });
 
 // Katalog silme
@@ -1317,25 +1315,23 @@ async function deleteCatalog(filename) {
     }
 }
 
-document.getElementById('saveCatalogsBtn')?.addEventListener('click', (e) => {
+document.getElementById('saveCatalogsBtn')?.addEventListener('click', async (e) => {
     e.preventDefault();
-    (async () => {
-        try {
-            currentSettings.kataloglar = {
-                phuketTur: document.getElementById('catalogPhuket').value,
-                balayi: document.getElementById('catalogBalayi').value
-            };
+    try {
+        currentSettings.kataloglar = {
+            phuketTur: document.getElementById('catalogPhuket').value,
+            balayi: document.getElementById('catalogBalayi').value
+        };
 
-            const result = await apiCall('/api/settings', 'POST', currentSettings);
+        const result = await apiCall('/api/settings', 'POST', currentSettings);
 
-            if (result && result.success !== false) {
-                showToast('Katalog ayarları kaydedildi!', 'success');
-            }
-        } catch (error) {
-            console.error('Katalog kayıt hatası:', error);
-            showToast('Kayıt hatası!', 'error');
+        if (result && result.success !== false) {
+            showToast('Katalog ayarları kaydedildi!', 'success');
         }
-    })();
+    } catch (error) {
+        console.error('Katalog kayıt hatası:', error);
+        showToast('Kayıt hatası!', 'error');
+    }
 });
 
 // =====================
