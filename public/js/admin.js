@@ -239,8 +239,9 @@ function loginWithFacebook() {
             }
         }
     }, {
-        scope: 'business_management,whatsapp_business_management,whatsapp_business_messaging',
-        return_scopes: true
+        scope: 'whatsapp_business_management,whatsapp_business_messaging',
+        return_scopes: true,
+        auth_type: 'rerequest'
     });
 }
 
