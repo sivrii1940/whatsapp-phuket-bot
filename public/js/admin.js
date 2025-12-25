@@ -796,18 +796,19 @@ let stats = { total: 0, users: 0, today: 0, catalogs: 0 };
 // WHATSAPP CONNECTION
 // =====================
 
+// QR Kod ile bağlan (Test modu)
 function connectWithQR() {
-    showConnectionStatus('QR kod oluşturuluyor...');
-    document.getElementById('qrCodeSection').classList.add('d-none');
+    const qrContainer = document.getElementById('qrCodeContainer');
     
-    // API'ye QR kod isteği gönder
-    (async () => {
-        try {
-            const result = await apiCall('/api/whatsapp/connect-qr', 'POST');
-            if (result && result.success) {
-                showConnectionStatus('QR kod bekleniyor...');
-                document.getElementById('qrCodeSection').classList.remove('d-none');
-                updateConnectionStatus('qr');
+    if (!qrContainer) {
+        alert('🚧 QR Kod bağlantısı geliştiriliyor...\n\nŞimdilik Facebook Login kullanın.');
+        return;
+    }
+    
+    // QR container'ı göster
+    qrContainer.classList.remove('d-none');
+    
+    alert('🚧 QR Kod özelliği yakında eklenecek!\n\nŞimdilik "Facebook ile Giriş Yap" kullanın.');
             } else {
                 throw new Error(result?.message || 'QR kod hatası');
             }
