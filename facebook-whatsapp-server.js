@@ -416,49 +416,54 @@ app.get('/webhook', (req, res) => {
     }
 });
 
-// QR Kod ile bağlantı - whatsapp-web.js
-const { Client, LocalAuth } = require('whatsapp-web.js');
-let qrClient = null;
+// QR Kod ile bağlantı - Baileys kullanarak (hafif)
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+const { Boom } = require('@hapi/boom');
+let baileysSock = null;
 
 app.post('/api/whatsapp/connect-qr', async (req, res) => {
     try {
-        console.log('📱 QR Kod bağlantısı başlatılıyor...');
+        console.log('📱 QR Kod bağlantısı başlatılıyor (Baileys)...');
         
-        if (qrClient) {
-            qrClient.destroy();
-        }
+        const { state, saveCreds } = await useMultiFileAuthState('./whatsapp-session');
         
-        qrClient = new Client({
-            authStrategy: new LocalAuth(),
-            puppeteer: {
-                headless: true,
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
+        baileysSock = makeWASocket({
+            auth: state,
+            printQRInTerminal: false
+        });
+        
+        baileysSock.ev.on('connection.update', async (update) => {
+            const { connection, lastDisconnect, qr } = update;
+            
+            if (qr) {
+                console.log('📱 QR Kod oluşturuldu!');
+                io.emit('qr-code', { qr });
+            }
+            
+            if (connection === 'close') {
+                const shouldReconnect = (lastDisconnect?.error instanceof Boom)
+                    ? lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut
+                    : true;
+                    
+                console.log('❌ Bağlantı kapandı:', lastDisconnect?.error, 'Yeniden bağlan:', shouldReconnect);
+            } else if (connection === 'open') {
+                console.log('✅ WhatsApp bağlantısı açıldı!');
+                io.emit('whatsapp-status', {
+                    status: 'connected',
+                    message: 'WhatsApp başarıyla bağlandı!'
+                });
             }
         });
         
-        qrClient.on('qr', (qr) => {
-            console.log('📱 QR Kod oluşturuldu!');
-            io.emit('qr-code', { qr });
-        });
+        baileysSock.ev.on('creds.update', saveCreds);
         
-        qrClient.on('ready', () => {
-            console.log('✅ WhatsApp QR kod ile bağlandı!');
-            io.emit('whatsapp-status', {
-                status: 'connected',
-                message: 'WhatsApp bağlantısı başarılı!'
-            });
+        baileysSock.ev.on('messages.upsert', async ({ messages }) => {
+            const msg = messages[0];
+            if (!msg.key.fromMe && msg.message) {
+                console.log('📨 Mesaj geldi:', msg.message);
+                // Mesaj işleme burada
+            }
         });
-        
-        qrClient.on('authenticated', () => {
-            console.log('✅ WhatsApp kimlik doğrulandı!');
-        });
-        
-        qrClient.on('message', async (msg) => {
-            console.log('📨 Mesaj geldi:', msg.body);
-            // Mesaj işleme burada
-        });
-        
-        await qrClient.initialize();
         
         res.json({
             success: true,
