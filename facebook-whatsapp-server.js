@@ -416,6 +416,64 @@ app.get('/webhook', (req, res) => {
     }
 });
 
+// QR Kod ile bağlantı - whatsapp-web.js
+const { Client, LocalAuth } = require('whatsapp-web.js');
+let qrClient = null;
+
+app.post('/api/whatsapp/connect-qr', async (req, res) => {
+    try {
+        console.log('📱 QR Kod bağlantısı başlatılıyor...');
+        
+        if (qrClient) {
+            qrClient.destroy();
+        }
+        
+        qrClient = new Client({
+            authStrategy: new LocalAuth(),
+            puppeteer: {
+                headless: true,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            }
+        });
+        
+        qrClient.on('qr', (qr) => {
+            console.log('📱 QR Kod oluşturuldu!');
+            io.emit('qr-code', { qr });
+        });
+        
+        qrClient.on('ready', () => {
+            console.log('✅ WhatsApp QR kod ile bağlandı!');
+            io.emit('whatsapp-status', {
+                status: 'connected',
+                message: 'WhatsApp bağlantısı başarılı!'
+            });
+        });
+        
+        qrClient.on('authenticated', () => {
+            console.log('✅ WhatsApp kimlik doğrulandı!');
+        });
+        
+        qrClient.on('message', async (msg) => {
+            console.log('📨 Mesaj geldi:', msg.body);
+            // Mesaj işleme burada
+        });
+        
+        await qrClient.initialize();
+        
+        res.json({
+            success: true,
+            message: 'QR kod oluşturuluyor...'
+        });
+        
+    } catch (error) {
+        console.error('❌ QR kod hatası:', error);
+        res.json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // Webhook - Meta'dan gelen mesajları işle
 app.post('/webhook', async (req, res) => {
     try {

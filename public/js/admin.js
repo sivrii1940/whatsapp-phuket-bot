@@ -797,20 +797,85 @@ let stats = { total: 0, users: 0, today: 0, catalogs: 0 };
 // WHATSAPP CONNECTION
 // =====================
 
-// QR Kod ile bağlan (Test modu)
-function connectWithQR() {
+// QR Kod ile bağlan - ÇALIŞIR HAL
+async function connectWithQR() {
     const qrContainer = document.getElementById('qrCodeContainer');
     
     if (!qrContainer) {
-        alert('🚧 QR Kod bağlantısı geliştiriliyor...\n\nŞimdilik Facebook Login kullanın.');
+        console.error('QR Container bulunamadı!');
+        alert('❌ QR Kod alanı bulunamadı!');
         return;
     }
     
-    // QR container'ı göster
-    qrContainer.classList.remove('d-none');
+    try {
+        console.log('📱 QR Kod bağlantısı başlatılıyor...');
+        
+        // QR container'ı göster
+        qrContainer.classList.remove('d-none');
+        qrContainer.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-success" role="status"></div><p class="mt-3">QR Kod oluşturuluyor...</p></div>';
+        
+        // Backend'den QR kod iste
+        const response = await fetch('/api/whatsapp/connect-qr', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.error || 'QR kod oluşturulamadı');
+        }
+        
+        console.log('✅ QR kod isteği gönderildi');
+        
+        // Socket.io ile QR kodu dinle
+        if (socket) {
+            socket.on('qr-code', (data) => {
+                console.log('📱 QR Kod geldi!');
+                displayQRCode(data.qr);
+            });
+        }
+        
+    } catch (error) {
+        console.error('❌ QR Kod hatası:', error);
+        qrContainer.innerHTML = `
+            <div class="alert alert-danger m-3">
+                <i class="bi bi-exclamation-triangle"></i>
+                <strong>Hata:</strong> ${error.message}
+            </div>
+        `;
+    }
+}
+
+// QR Kodu göster
+function displayQRCode(qrData) {
+    const qrContainer = document.getElementById('qrCodeContainer');
+    if (!qrContainer) return;
     
-    alert('🚧 QR Kod özelliği yakında eklenecek!\n\nŞimdilik "Facebook ile Giriş Yap" kullanın.');
-};
+    qrContainer.innerHTML = `
+        <div class="text-center p-4">
+            <h5 class="mb-3">📱 WhatsApp'tan QR Kodu Okutun</h5>
+            <div class="bg-white p-3 rounded d-inline-block">
+                <canvas id="qr-canvas"></canvas>
+            </div>
+            <p class="mt-3 small text-muted">
+                <i class="bi bi-info-circle"></i>
+                WhatsApp → Ayarlar → Bağlı Cihazlar → Cihaz Bağla
+            </p>
+        </div>
+    `;
+    
+    // QR Code library ile QR oluştur (qrcode.js kullanılacak)
+    const canvas = document.getElementById('qr-canvas');
+    if (canvas && typeof QRCode !== 'undefined') {
+        QRCode.toCanvas(canvas, qrData, { width: 256 }, (error) => {
+            if (error) console.error('QR Code hatası:', error);
+        });
+    } else {
+        // Fallback: Text olarak göster
+        qrContainer.innerHTML += `<pre class="small">${qrData}</pre>`;
+    }
+}
 
 // Phone ile bağlan
 function connectWithPhone() {
