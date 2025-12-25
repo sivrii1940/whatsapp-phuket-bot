@@ -206,7 +206,8 @@ async function connectWithTestToken() {
 }
 
 // Facebook Login Function
-function loginWithFacebook() {
+// Facebook Login Function - Global
+window.loginWithFacebook = function() {
     if (typeof FB === 'undefined') {
         alert('Facebook SDK yükleniyor, lütfen sayfayı yenileyin.');
         location.reload();
@@ -809,17 +810,9 @@ function connectWithQR() {
     qrContainer.classList.remove('d-none');
     
     alert('🚧 QR Kod özelliği yakında eklenecek!\n\nŞimdilik "Facebook ile Giriş Yap" kullanın.');
-            } else {
-                throw new Error(result?.message || 'QR kod hatası');
-            }
-        } catch (error) {
-            console.error('QR kod hatası:', error);
-            showToast(error.message || 'QR kod başlatılamadı!', 'error');
-            hideConnectionStatus();
-        }
-    })();
-}
+};
 
+// Phone ile bağlan
 function connectWithPhone() {
     showToast('Telefon bağlantısı şu anda geliştiriliyor. QR kod kullanın.', 'warning');
 }
