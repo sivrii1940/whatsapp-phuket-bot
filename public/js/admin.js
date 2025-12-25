@@ -117,7 +117,7 @@ function initializeSocket(userId) {
     
     console.log('🔌 Socket.io bağlantısı kuruluyor...');
     
-    socket = io('http://localhost:3000', {
+    socket = io(window.location.origin, {
         query: { userId: userId || 'guest' },
         transports: ['websocket', 'polling'],
         reconnection: true,
@@ -135,6 +135,14 @@ function initializeSocket(userId) {
             updateConnectionStatus('online', 'WhatsApp Bağlı', data.phoneNumber);
         } else {
             updateConnectionStatus('offline', 'Bağlantı Kesildi', data.message || '');
+        }
+    });
+    
+    // QR Kod listener - GLOBAL
+    socket.on('qr-code', (data) => {
+        console.log('📱 QR Kod geldi!', data);
+        if (data.qr) {
+            displayQRCode(data.qr);
         }
     });
     
@@ -826,15 +834,7 @@ async function connectWithQR() {
             throw new Error(result.error || 'QR kod oluşturulamadı');
         }
         
-        console.log('✅ QR kod isteği gönderildi');
-        
-        // Socket.io ile QR kodu dinle
-        if (socket) {
-            socket.on('qr-code', (data) => {
-                console.log('📱 QR Kod geldi!');
-                displayQRCode(data.qr);
-            });
-        }
+        console.log('✅ QR kod isteği gönderildi, socket.io dinlemeye hazır...');
         
     } catch (error) {
         console.error('❌ QR Kod hatası:', error);
