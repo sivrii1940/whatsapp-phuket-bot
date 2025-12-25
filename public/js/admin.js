@@ -249,41 +249,57 @@ function loginWithFacebook() {
 async function getWhatsAppBusinessAccounts(accessToken) {
     try {
         console.log('📱 WhatsApp Business hesapları alınıyor...');
+        userAccessToken = accessToken;
         
-        // Meta Graph API'den WhatsApp Business hesaplarını al
-        const response = await fetch(`https://graph.facebook.com/v21.0/me/businesses?access_token=${accessToken}`);
-        const data = await response.json();
+        // Kullanıcı bilgilerini al
+        const userResponse = await fetch(`https://graph.facebook.com/v21.0/me?fields=id,name&access_token=${accessToken}`);
+        const userData = await userResponse.json();
+        console.log('👤 User Data:', userData);
         
-        if (data.data && data.data.length > 0) {
-            console.log('✅ Business hesapları bulundu:', data.data);
-            
-            // İlk business'ın WhatsApp hesaplarını al
-            const businessId = data.data[0].id;
-            const wbaResponse = await fetch(`https://graph.facebook.com/v21.0/${businessId}/owned_whatsapp_business_accounts?access_token=${accessToken}`);
-            const wbaData = await wbaResponse.json();
-            
-            if (wbaData.data && wbaData.data.length > 0) {
-                const waba = wbaData.data[0];
-                console.log('✅ WhatsApp Business Account bulundu:', waba);
+        if (userData.error) {
+            throw new Error(userData.error.message);
+        }
+        
+        currentUserId = userData.id;
+        
+        // DOĞRUDAN WhatsApp Business hesaplarını al
+        const wbaResponse = await fetch(`https://graph.facebook.com/v21.0/${userData.id}/businesses?fields=id,name,owned_whatsapp_business_accounts{id,name,account_review_status,phone_numbers{id,display_phone_number,verified_name}}&access_token=${accessToken}`);
+        const wbaData = await wbaResponse.json();
+        
+        console.log('📦 WABA Response:', wbaData);
+        
+        if (wbaData.error) {
+            console.error('❌ WABA Error:', wbaData.error);
+            throw new Error(wbaData.error.message);
+        }
+        
+        // WhatsApp Business hesaplarını bul
+        let wabaFound = false;
+        
+        if (wbaData.data && wbaData.data.length > 0) {
+            for (const business of wbaData.data) {
+                console.log('🏢 Business:', business);
                 
-                // Phone Number ID'yi al
-                const phoneResponse = await fetch(`https://graph.facebook.com/v21.0/${waba.id}/phone_numbers?access_token=${accessToken}`);
-                const phoneData = await phoneResponse.json();
-                
-                if (phoneData.data && phoneData.data.length > 0) {
-                    const phone = phoneData.data[0];
-                    console.log('✅ Telefon numarası bulundu:', phone);
+                if (business.owned_whatsapp_business_accounts && business.owned_whatsapp_business_accounts.data.length > 0) {
+                    const waba = business.owned_whatsapp_business_accounts.data[0];
+                    console.log('✅ WhatsApp Business Account bulundu:', waba);
                     
-                    // Bağlantıyı kur
-                    await connectWhatsAppAccount(accessToken, phone.id, phone.display_phone_number, waba.name);
-                } else {
-                    alert('WhatsApp telefon numarası bulunamadı.');
+                    if (waba.phone_numbers && waba.phone_numbers.data.length > 0) {
+                        const phone = waba.phone_numbers.data[0];
+                        console.log('✅ Telefon numarası bulundu:', phone);
+                        
+                        wabaFound = true;
+                        
+                        // Bağlantıyı kur
+                        await connectWhatsAppAccount(accessToken, phone.id, phone.display_phone_number, waba.name || business.name);
+                        break;
+                    }
                 }
-            } else {
-                alert('WhatsApp Business hesabı bulunamadı. Lütfen Meta Business Suite\'de WhatsApp hesabı ekleyin.');
             }
-        } else {
-            alert('Facebook Business hesabı bulunamadı.');
+        }
+        
+        if (!wabaFound) {
+            alert('❌ WhatsApp Business hesabı bulunamadı.\n\nLütfen Meta Business Suite\'te WhatsApp Business hesabınızı ayarlayın:\nhttps://business.facebook.com/');
         }
     } catch (error) {
         console.error('❌ Hata:', error);
