@@ -198,3 +198,4 @@ Sorularınız için iletişime geçin.
 ## 📜 Lisans
 
 MIT License - Serbestçe kullanabilirsiniz.
+  
