@@ -316,11 +316,6 @@ async function getWhatsAppBusinessAccounts(accessToken, userID) {
         alert('WhatsApp hesapları alınırken hata: ' + error.message);
     }
 }
-    } catch (error) {
-        console.error('❌ Hata:', error);
-        alert('WhatsApp hesapları alınırken hata: ' + error.message);
-    }
-}
 
 // WhatsApp hesabını bağla
 async function connectWhatsAppAccount(accessToken, phoneId, phoneNumber, businessName) {
