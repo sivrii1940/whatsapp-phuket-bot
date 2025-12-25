@@ -17,7 +17,7 @@ window.fbAsyncInit = function() {
             appId: '1420845422894593', // Your Meta App ID
             cookie: true,
             xfbml: true,
-            version: 'v18.0'
+            version: 'v21.0'
         });
         
         console.log('✅ Facebook SDK initialized');
@@ -245,75 +245,56 @@ function loginWithFacebook() {
     });
 }
 
-// WhatsApp Business hesaplarını otomatik bul
+// WhatsApp Business hesaplarını manuel Phone ID ile bağla
 async function getWhatsAppBusinessAccounts(accessToken, userID) {
+    currentUserId = userID;
+    userAccessToken = accessToken;
+    
+    console.log('✅ Facebook Login başarılı! Phone Number ID isteniyor...');
+    
+    // Kullanıcıdan Phone Number ID iste - EN HIZLI YÖNTEM
+    const phoneId = prompt(
+        '✅ Facebook girişi başarılı!\n\n' +
+        '📱 Meta Console\'dan Phone Number ID\'yi alın:\n\n' +
+        '1. Yeni sekmede açın:\n' +
+        '   https://business.facebook.com/wa/manage/phone-numbers/\n\n' +
+        '2. Telefon numaranızı seçin\n' +
+        '3. "Phone number ID" kopyalayın (örn: 979792258544716)\n' +
+        '4. Buraya yapıştırın:'
+    );
+    
+    if (!phoneId || phoneId.trim() === '') {
+        alert('❌ Phone Number ID gerekli!\n\nTekrar giriş yapın ve ID\'yi girin.');
+        showPage('connection');
+        return;
+    }
+    
+    // Phone Number bilgilerini doğrula ve al
     try {
-        console.log('📱 WhatsApp Business hesapları alınıyor...');
+        const phoneResponse = await fetch(`https://graph.facebook.com/v21.0/${phoneId}?fields=display_phone_number,verified_name&access_token=${accessToken}`);
+        const phoneData = await phoneResponse.json();
         
-        currentUserId = userID;
-        userAccessToken = accessToken;
-        
-        // Kullanıcı bilgilerini al
-        const userResponse = await fetch(`https://graph.facebook.com/v18.0/me?fields=id,name&access_token=${accessToken}`);
-        const userData = await userResponse.json();
-        console.log('👤 User Data:', userData);
-        
-        if (userData.error) {
-            throw new Error(userData.error.message);
+        if (phoneData.error) {
+            console.error('❌ Phone ID hatası:', phoneData.error);
+            alert('❌ Geçersiz Phone Number ID!\n\n' + phoneData.error.message + '\n\nLütfen doğru ID\'yi Meta Console\'dan kopyalayın.');
+            showPage('connection');
+            return;
         }
         
-        // WABA ID'yi direkt al - v18.0 API ile
-        const wabaResponse = await fetch(`https://graph.facebook.com/v18.0/me/accounts?fields=whatsapp_business_account{id,name}&access_token=${accessToken}`);
-        const wabaData = await wabaResponse.json();
+        console.log('✅ Phone Number doğrulandı:', phoneData);
         
-        console.log('📦 WABA Response:', wabaData);
-        
-        if (wabaData.error) {
-            console.error('❌ WABA Error:', wabaData.error);
-            throw new Error(wabaData.error.message);
-        }
-        
-        // WhatsApp Business Account bul
-        let wabaFound = false;
-        
-        if (wabaData.data && wabaData.data.length > 0) {
-            for (const account of wabaData.data) {
-                if (account.whatsapp_business_account) {
-                    const wabaId = account.whatsapp_business_account.id;
-                    console.log('✅ WABA ID bulundu:', wabaId);
-                    
-                    // Phone numbers al
-                    const phoneResponse = await fetch(`https://graph.facebook.com/v18.0/${wabaId}/phone_numbers?access_token=${accessToken}`);
-                    const phoneData = await phoneResponse.json();
-                    
-                    console.log('📞 Phone Numbers:', phoneData);
-                    
-                    if (phoneData.data && phoneData.data.length > 0) {
-                        const phone = phoneData.data[0];
-                        console.log('✅ Telefon numarası bulundu:', phone);
-                        
-                        wabaFound = true;
-                        
-                        // Bağlantıyı kur
-                        await connectWhatsAppAccount(
-                            accessToken,
-                            phone.id,
-                            phone.display_phone_number,
-                            phone.verified_name || userData.name
-                        );
-                        break;
-                    }
-                }
-            }
-        }
-        
-        if (!wabaFound) {
-            alert('❌ WhatsApp Business hesabı bulunamadı.\n\nLütfen Meta Business Suite\'te WhatsApp Business hesabınızı ayarlayın:\nhttps://business.facebook.com/');
-        }
+        // Direkt bağlan
+        await connectWhatsAppAccount(
+            accessToken,
+            phoneId,
+            phoneData.display_phone_number || '+1 XXX XXX XXXX',
+            phoneData.verified_name || 'WhatsApp Business'
+        );
         
     } catch (error) {
         console.error('❌ Hata:', error);
-        alert('WhatsApp hesapları alınırken hata: ' + error.message);
+        alert('❌ Bağlantı hatası: ' + error.message);
+        showPage('connection');
     }
 }
 
