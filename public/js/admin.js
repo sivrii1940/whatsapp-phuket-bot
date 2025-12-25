@@ -847,8 +847,8 @@ async function connectWithQR() {
     }
 }
 
-// QR Kodu göster
-function displayQRCode(qrData) {
+// QR Kodu göster - Data URL ile
+function displayQRCode(qrDataURL) {
     const qrContainer = document.getElementById('qrCodeContainer');
     if (!qrContainer) return;
     
@@ -856,7 +856,7 @@ function displayQRCode(qrData) {
         <div class="text-center p-4">
             <h5 class="mb-3">📱 WhatsApp'tan QR Kodu Okutun</h5>
             <div class="bg-white p-3 rounded d-inline-block">
-                <canvas id="qr-canvas"></canvas>
+                <img src="${qrDataURL}" alt="QR Code" style="width: 256px; height: 256px;">
             </div>
             <p class="mt-3 small text-muted">
                 <i class="bi bi-info-circle"></i>
@@ -864,17 +864,6 @@ function displayQRCode(qrData) {
             </p>
         </div>
     `;
-    
-    // QR Code library ile QR oluştur (qrcode.js kullanılacak)
-    const canvas = document.getElementById('qr-canvas');
-    if (canvas && typeof QRCode !== 'undefined') {
-        QRCode.toCanvas(canvas, qrData, { width: 256 }, (error) => {
-            if (error) console.error('QR Code hatası:', error);
-        });
-    } else {
-        // Fallback: Text olarak göster
-        qrContainer.innerHTML += `<pre class="small">${qrData}</pre>`;
-    }
 }
 
 // Phone ile bağlan
