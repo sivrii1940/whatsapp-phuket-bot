@@ -422,10 +422,15 @@ app.get('/webhook', (req, res) => {
 // QR Kod ile bağlantı - Basit ve çalışır versiyon
 let baileysSock = null;
 let qrCodeData = null;
+let qrCodeDataURL = null;
 
 app.post('/api/whatsapp/connect-qr', async (req, res) => {
     try {
         console.log('📱 QR Kod bağlantısı başlatılıyor...');
+        
+        // QR'ı sıfırla
+        qrCodeData = null;
+        qrCodeDataURL = null;
         
         // Eğer zaten bir bağlantı varsa temizle
         if (baileysSock) {
@@ -457,14 +462,20 @@ app.post('/api/whatsapp/connect-qr', async (req, res) => {
                 console.log('📱 QR Kod oluşturuldu!');
                 qrCodeData = qr;
                 
-                // QR'ı data URL'e çevir
-                const qrDataURL = await QRCode.toDataURL(qr);
-                
-                // Socket.io ile gönder
-                io.emit('qr-code', { 
-                    qr: qrDataURL,
-                    qrString: qr 
-                });
+                try {
+                    // QR'ı data URL'e çevir
+                    qrCodeDataURL = await QRCode.toDataURL(qr);
+                    
+                    // Socket.io ile gönder
+                    io.emit('qr-code', { 
+                        qr: qrCodeDataURL,
+                        qrString: qr 
+                    });
+                    
+                    console.log('✅ QR kod emit edildi!');
+                } catch (err) {
+                    console.error('❌ QR kod oluşturma hatası:', err);
+                }
             }
             
             if (connection === 'close') {
@@ -512,6 +523,15 @@ app.post('/api/whatsapp/connect-qr', async (req, res) => {
             error: error.message
         });
     }
+});
+
+// QR Kod polling - Frontend QR hazır mı diye kontrol eder
+app.get('/api/whatsapp/qr-status', (req, res) => {
+    res.json({
+        success: true,
+        hasQR: !!qrCodeDataURL,
+        qr: qrCodeDataURL || null
+    });
 });
 
 // Webhook - Meta'dan gelen mesajları işle

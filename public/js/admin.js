@@ -834,7 +834,31 @@ async function connectWithQR() {
             throw new Error(result.error || 'QR kod oluşturulamadı');
         }
         
-        console.log('✅ QR kod isteği gönderildi, socket.io dinlemeye hazır...');
+        console.log('✅ QR kod isteği gönderildi, QR oluşması bekleniyor...');
+        
+        // QR hazır mı diye polling yap
+        let pollCount = 0;
+        const pollInterval = setInterval(async () => {
+            try {
+                const pollRes = await fetch('/api/whatsapp/qr-status');
+                const pollData = await pollRes.json();
+                
+                if (pollData.hasQR && pollData.qr) {
+                    clearInterval(pollInterval);
+                    console.log('✅ QR kod alındı!');
+                    displayQRCode(pollData.qr);
+                }
+                
+                pollCount++;
+                if (pollCount > 20) { // 20 saniye timeout
+                    clearInterval(pollInterval);
+                    throw new Error('QR kod 20 saniyede oluşmadı');
+                }
+            } catch (err) {
+                clearInterval(pollInterval);
+                console.error('Polling hatası:', err);
+            }
+        }, 1000); // Her saniye kontrol
         
     } catch (error) {
         console.error('❌ QR Kod hatası:', error);
