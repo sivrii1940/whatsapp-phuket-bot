@@ -4,6 +4,8 @@ const fs = require('fs').promises;
 const path = require('path');
 const http = require('http');
 const socketIO = require('socket.io');
+const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+const { Boom } = require('@hapi/boom');
 
 const app = express();
 const server = http.createServer(app);
@@ -417,8 +419,6 @@ app.get('/webhook', (req, res) => {
 });
 
 // QR Kod ile bağlantı - Baileys kullanarak (hafif)
-const { default: makeWASocket, DisconnectReason, useMultiFileAuthState } = require('@whiskeysockets/baileys');
-const { Boom } = require('@hapi/boom');
 let baileysSock = null;
 
 app.post('/api/whatsapp/connect-qr', async (req, res) => {
