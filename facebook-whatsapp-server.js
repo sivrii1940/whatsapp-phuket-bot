@@ -502,12 +502,60 @@ app.post('/api/whatsapp/connect-qr', async (req, res) => {
         
         baileysSock.ev.on('creds.update', saveCreds);
         
-        // Gelen mesajları dinle
+        // Gelen mesajları dinle - BOT MANTĞI
         baileysSock.ev.on('messages.upsert', async ({ messages }) => {
             const msg = messages[0];
-            if (!msg.key.fromMe && msg.message) {
-                console.log('📨 Mesaj:', msg.message);
-                // TODO: Mesaj işleme ekle
+            
+            // Kendi mesajlarımızı atla
+            if (msg.key.fromMe) return;
+            
+            // Mesaj yoksa atla
+            if (!msg.message) return;
+            
+            const from = msg.key.remoteJid;
+            const messageText = msg.message.conversation || 
+                               msg.message.extendedTextMessage?.text || 
+                               '';
+            
+            console.log('📨 Gelen mesaj:', from, '-', messageText);
+            
+            try {
+                // Basit karşılama ve yönlendirme
+                const lowerText = messageText.toLowerCase().trim();
+                let replyText = '';
+                
+                if (lowerText === 'merhaba' || lowerText === 'selam' || lowerText === 'hi') {
+                    // messages.json'dan hoşgeldin mesajı
+                    const messagesData = JSON.parse(await fs.readFile(path.join(__dirname, 'data', 'messages.json'), 'utf8'));
+                    replyText = messagesData.hosgeldin + '\n\n1️⃣ Balayı Turu\n2️⃣ Grup Turları\n3️⃣ Özel Tarihli Tur\n\n_Lütfen 1, 2 veya 3 yazarak seçim yapın._';
+                } else if (lowerText === '1' || lowerText.includes('balayı')) {
+                    const messagesData = JSON.parse(await fs.readFile(path.join(__dirname, 'data', 'messages.json'), 'utf8'));
+                    replyText = messagesData.balayiTatili.anaMenu;
+                } else if (lowerText === '2' || lowerText.includes('grup')) {
+                    const messagesData = JSON.parse(await fs.readFile(path.join(__dirname, 'data', 'messages.json'), 'utf8'));
+                    replyText = messagesData.grupTurlari.anaMenu;
+                } else if (lowerText === '3' || lowerText.includes('özel')) {
+                    const messagesData = JSON.parse(await fs.readFile(path.join(__dirname, 'data', 'messages.json'), 'utf8'));
+                    replyText = messagesData.ozelTarihliTur.anaMenu;
+                } else if (lowerText.includes('görüşme') || lowerText.includes('randevu')) {
+                    const messagesData = JSON.parse(await fs.readFile(path.join(__dirname, 'data', 'messages.json'), 'utf8'));
+                    replyText = messagesData.gorusmeTalebi.onay;
+                } else if (lowerText === 'menu' || lowerText === 'menü') {
+                    const messagesData = JSON.parse(await fs.readFile(path.join(__dirname, 'data', 'messages.json'), 'utf8'));
+                    replyText = messagesData.genel.menuDon;
+                } else {
+                    const messagesData = JSON.parse(await fs.readFile(path.join(__dirname, 'data', 'messages.json'), 'utf8'));
+                    replyText = messagesData.genel.anlasilmadi;
+                }
+                
+                // Cevap gönder
+                if (replyText) {
+                    await baileysSock.sendMessage(from, { text: replyText });
+                    console.log('✅ Cevap gönderildi:', from);
+                }
+                
+            } catch (error) {
+                console.error('❌ Mesaj işleme hatası:', error);
             }
         });
         

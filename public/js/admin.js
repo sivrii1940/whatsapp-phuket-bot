@@ -133,6 +133,19 @@ function initializeSocket(userId) {
         console.log('📱 WhatsApp durum güncellemesi:', data);
         if (data.status === 'connected') {
             updateConnectionStatus('online', 'WhatsApp Bağlı', data.phoneNumber);
+            
+            // QR container'ı güncelle
+            const qrContainer = document.getElementById('qrCodeContainer');
+            if (qrContainer && !qrContainer.classList.contains('d-none')) {
+                qrContainer.innerHTML = `
+                    <div class="alert alert-success m-3 text-center">
+                        <i class="bi bi-check-circle fs-1"></i>
+                        <h5 class="mt-3">✅ WhatsApp Bağlandı!</h5>
+                        <p class="mb-0">Telefon: ${data.phoneNumber || 'Bağlı'}</p>
+                        <small class="text-muted">Bot artık mesajlara cevap verecek! 🤖</small>
+                    </div>
+                `;
+            }
         } else {
             updateConnectionStatus('offline', 'Bağlantı Kesildi', data.message || '');
         }
